@@ -1,6 +1,8 @@
 ### Match com equipe e Upload na Turn
 # A partir dos usuários selecionados para o dia no Passo 1, une suas informações com suas informações 
 # de equipe/estabelecimentos que esta no Big Query e advem da Turn. Após isso da upload desses contatos na turn.
+
+
 #### Configurações iniciais do ambiente
 
 
@@ -8,7 +10,7 @@
 #### Match
 # Une dados da tabela de seção diaria "ip_mensageria_camada_prata.historico_envio_mensagens" do BigQuery 
 # com os dados do estabelecimento que a pessoa é pertencente, por meio do dos dados que estão registradas 
-# na tabela "5511974565221.contacts" no BigQuery.
+# na view "ip_mensageria_camada_prata.contact_details_turnio" no BigQuery.
 
 
 
@@ -23,5 +25,6 @@ tokens_municipios = [
     {"municipio": "Monsenhor Tabosa", "id_sus": "210810", "token": os.getenv('ENV_MONSENHORTABOSA_CE')},
     {"municipio": "Lago Verde", "id_sus": "210590", "token": os.getenv('ENV_LAGOVERDE_MA')}                                        
 ]
-for linha in dataframe:
+
+print("Oie")
     
