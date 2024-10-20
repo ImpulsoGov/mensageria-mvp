@@ -103,10 +103,6 @@ df_pendencias['municipio_id_sus'] = df_pendencias['municipio_id_sus'].fillna(0).
 df_pendencias['equipe_ine'] = df['equipe_ine'].fillna(0).astype(int).astype(str)
 df_pendencias['cns'] = df['cns'].fillna(0).astype(int).astype(str)
 df['celular_tratado'] = df['celular_tratado'].fillna(0).astype(int).astype(str)
-# df['nome_do_paciente'] = df['nome_do_paciente'].astype(str)
-# df_pendencias['nome_do_paciente'] = df_pendencias['nome_do_paciente'].astype(str)
-# df['data_de_nascimento'] = pd.to_datetime(df['data_de_nascimento'], errors='coerce')
-# df_pendencias['data_de_nascimento'] = pd.to_datetime(df_pendencias['data_de_nascimento'], errors='coerce')
 df_pendencias = df_pendencias[['nome_do_paciente','data_de_nascimento','municipio_id_sus','citopatologico_pendente_atual','cronicos_pendente_atual']]
 df_unificado = df.merge(df_pendencias, how='right', on=['nome_do_paciente','data_de_nascimento','municipio_id_sus'])
 # Verificaçao se a linha de cuidado ainda está pendente
