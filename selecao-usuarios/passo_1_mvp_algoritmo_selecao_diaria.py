@@ -90,6 +90,7 @@ df_historico_envio_mensagens = pd.DataFrame(rows)
 
 
 
+
 #### Preparação dos dados
 # Identificação dos cidadãos com pendências em cito
 df_pendencias['citopatologico_pendente_atual'] = df_pendencias['status_exame'].apply(lambda x: True if x in ('exame_nunca_realizado','exame_vencido','exame_vence_no_quadrimestre_atual') else False)
@@ -97,15 +98,20 @@ df_pendencias['citopatologico_pendente_atual'] = df_pendencias['status_exame'].a
 df_pendencias['cronicos_pendente_atual'] = df_pendencias.apply(pendencia_cronicos,axis=1)
 # Junção dos dados históricos com a verificação de pendência atual
 # Converter as colunas 'municipio_id_sus' para o mesmo tipo (string)
-df['municipio_id_sus'] = df['municipio_id_sus'].astype(str)
-df_pendencias['municipio_id_sus'] = df_pendencias['municipio_id_sus'].astype(str)
-df_unificado = df.merge(df_pendencias[['nome_do_paciente','data_de_nascimento','municipio_id_sus','citopatologico_pendente_atual','cronicos_pendente_atual']], how='left', on=['nome_do_paciente','data_de_nascimento','municipio_id_sus'])
-######################## ERRO ########################
-# # Verificaçao se a linha de cuidado ainda está pendente
-# df_unificado['pendencia_atualizada'] = df_unificado.apply(pendencia_atualizada,axis=1)
-# df_unificado = df_unificado[df_unificado['pendencia_atualizada']==True]
-import pdb; pdb.set_trace()
-######################## ERRO ########################
+df['municipio_id_sus'] = df['municipio_id_sus'].fillna(0).astype(int).astype(str)
+df_pendencias['municipio_id_sus'] = df_pendencias['municipio_id_sus'].fillna(0).astype(int).astype(str)
+df_pendencias['equipe_ine'] = df['equipe_ine'].fillna(0).astype(int).astype(str)
+df_pendencias['cns'] = df['cns'].fillna(0).astype(int).astype(str)
+df['celular_tratado'] = df['celular_tratado'].fillna(0).astype(int).astype(str)
+# df['nome_do_paciente'] = df['nome_do_paciente'].astype(str)
+# df_pendencias['nome_do_paciente'] = df_pendencias['nome_do_paciente'].astype(str)
+# df['data_de_nascimento'] = pd.to_datetime(df['data_de_nascimento'], errors='coerce')
+# df_pendencias['data_de_nascimento'] = pd.to_datetime(df_pendencias['data_de_nascimento'], errors='coerce')
+df_pendencias = df_pendencias[['nome_do_paciente','data_de_nascimento','municipio_id_sus','citopatologico_pendente_atual','cronicos_pendente_atual']]
+df_unificado = df.merge(df_pendencias, how='right', on=['nome_do_paciente','data_de_nascimento','municipio_id_sus'])
+# Verificaçao se a linha de cuidado ainda está pendente
+df_unificado['pendencia_atualizada'] = df_unificado.apply(pendencia_atualizada,axis=1)
+df_unificado = df_unificado[df_unificado['pendencia_atualizada']==True]
 df_unificado = df_unificado.drop_duplicates()
 df_unificado['chave_cidadao'] = df_unificado['nome_do_paciente'].astype(str) + '_' + df_unificado['data_de_nascimento'].astype(str)
 if not(df_historico_envio_mensagens.empty):
@@ -114,7 +120,6 @@ if not(df_historico_envio_mensagens.empty):
     df_filtrado = df_unificado[~df_unificado['chave_cidadao'].isin(df_historico_envio_mensagens['chave_cidadao'])]
 else:
     df_filtrado = df_unificado
-
 
 
 ### Tratamento dos celulares
