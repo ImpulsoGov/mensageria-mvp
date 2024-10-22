@@ -4,7 +4,21 @@
 
 
 #### Configurações iniciais do ambiente
-
+import pandas as pd
+import io
+import numpy as np
+from sklearn.model_selection import train_test_split
+from google.oauth2 import service_account
+from datetime import datetime
+from google.cloud import bigquery
+import requests
+import json
+import time
+from dotenv import load_dotenv
+import os
+credentials = service_account.Credentials.from_service_account_file('credencial_bigquery.json')
+project_id = 'predictive-keep-314223'
+client = bigquery.Client(credentials= credentials,project=project_id)
 
 
 #### Match
@@ -46,5 +60,4 @@ tokens_municipios = [
 
 ]
 
-print("Oie")
 
