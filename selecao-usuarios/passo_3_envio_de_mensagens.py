@@ -1,10 +1,15 @@
+# ### Envio de mensagens
+# A partir dos usuários que foram selecionados e enriquecidos os dados envia programa 
+# seu envio de mensagem.
+
+
+# ### Imports 
 import os
 import requests
 import json
 from dotenv import load_dotenv
-# ### Envio de mensagens
 
-# A partir dos usuários que foram selecionados e enriquecidos os dados envia programa seu envio de mensagem.
+
 
 # #### Configurações iniciais do ambiente
 load_dotenv() 
@@ -23,8 +28,9 @@ tokens_municipios = [
 URL_API_MENSAGENS = "https://whatsapp.turn.io/v1/messages"
 TEMPLATE_NAMESPACE = os.getenv('TEMPLATE_NAMESPACE')
 
-# #### Programa a mensagem
 
+
+# #### Programa a mensagem
 contatos = [
     {"whatsapp_id": "5583999568450", "nome_do_paciente": "João", "municipio_id_sus": "210810", "municipio": "Paulo Ramos", "linha_de_cuidado": "cito"},
     {"whatsapp_id": "5583999667449", "nome_do_paciente": "Maria", "municipio_id_sus": "210810", "municipio": "Paulo Ramos", "linha_de_cuidado": "cronicos"},
@@ -69,8 +75,6 @@ def seleciona_template_por_linha_de_cuidado(contato):
         }
         
     return template
-   
-
 def envia_mensagem(token, whatsapp_id, template):
     headers = {
         'Authorization': f'Bearer {token}',
@@ -100,4 +104,4 @@ for contato in contatos:
     if token_valor:
         envia_mensagem(token_valor, whatsapp_id, template)
     else:
-        print(f"Não foi encontrado token para o municipio {contato['municipio_id_sus']}")       
+        print(f"Não foi encontrado token para o municipio {contato['municipio_id_sus']}")
