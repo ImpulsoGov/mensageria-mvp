@@ -1,0 +1,63 @@
+name: Build e Deploy para Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar Repositório
+        uses: actions/checkout@v2
+
+      - name: Instalar Google Cloud CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-cloud-cli
+
+      - name: Autenticar no Google Cloud
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Configurar Docker para GCP
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Construir Imagem Docker
+        run: |
+          docker build -t mesageria-mvp:latest .
+
+      - name: Adicionar Tag à Imagem Docker
+        run: |
+          docker tag mesageria-mvp:latest us-central1-docker.pkg.dev/predictive-keep-314223/mesageria-mvp/mesageria-mvp:latest
+
+      - name: Enviar Imagem Docker
+        run: |
+          docker push us-central1-docker.pkg.dev/predictive-keep-314223/mesageria-mvp/mesageria-mvp:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Instalar Google Cloud CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-cloud-cli
+
+      - name: Autenticar no Google Cloud
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Fazer Deploy no Google Cloud Run
+        run: |
+          gcloud run deploy mesageria-mvp-staging \
+            --image="us-central1-docker.pkg.dev/predictive-keep-314223/mesageria-mvp/mesageria-mvp:latest" \
+            --region=us-central1 \
+            --platform=managed \
+            --allow-unauthenticated
