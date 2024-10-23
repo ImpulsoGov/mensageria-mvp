@@ -21,6 +21,63 @@ project_id = 'predictive-keep-314223'
 client = bigquery.Client(credentials= credentials,project=project_id)
 
 
+
+#### Funcoes
+def get_token(municipio_id_sus):
+    for token_info in tokens_municipios:
+        if token_info['id_sus'] == municipio_id_sus:
+            return token_info['token']
+    return None
+
+def send_data(df, municipio_id_sus):
+    token = get_token(municipio_id_sus)
+    if not token:
+        print(f"Token não encontrado para {municipio_id_sus}")
+        return
+
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Accept': 'application/vnd.v1+json',
+        'Content-Type': 'application/json'
+    }
+
+    df_filtered = df[df['municipio_id_sus'] == municipio_id_sus]
+
+    for i, row in df_filtered.iterrows():
+        data_message = {
+            "preview_url": False,
+            "recipient_type": "individual",
+            "to": str(row.celular_tratado),
+            "type": "text",
+            "text": {"body": "Este número pertence a ImpulsoGov."}
+        }
+        url_message = 'https://whatsapp.turn.io/v1/messages'
+
+        try:
+            response_message = requests.post(url_message, headers=headers, json=data_message)
+            print(f"Resposta da mensagem para {row.celular_tratado}: {response_message.text}")
+        except Exception as e:
+            print(f"Erro ao enviar mensagem para {row.celular_tratado}: {e}")
+            continue
+
+        time.sleep(1)
+
+        #atualiza opted_in
+        json_data_profile = {
+            "opted_in": True,
+        }
+        url_profile = f'https://whatsapp.turn.io/v1/contacts/{row.celular_tratado}/profile'
+
+        try:
+            response_profile = requests.patch(url_profile, headers=headers, json=json_data_profile)
+            print(f"Resposta do perfil para {row.celular_tratado}: {response_profile.text}")
+        except Exception as e:
+            print(f"Erro ao atualizar perfil de {row.celular_tratado}: {e}")
+
+        time.sleep(1)
+
+
+
 #### Match
 # Une dados da tabela de seção diaria "ip_mensageria_camada_prata.historico_envio_mensagens" do BigQuery 
 # com os dados do estabelecimento que a pessoa é pertencente, por meio do dos dados que estão registradas 
@@ -57,7 +114,9 @@ tokens_municipios = [
     {"municipio": "Baraúna", "id_sus": "240145", "token": os.getenv('ENV_BARAUNA_RN')},
     {"municipio": "Jucuruçu", "id_sus": "291845", "token": os.getenv('ENV_JUCURUCU_BA')},
     {"municipio": "Vitorino Freire", "id_sus": "211300", "token": os.getenv('ENV_VITORINOFREIRE_MA')},
-
 ]
+
+for municipio_id_sus in df_envio_turn['municipio_id_sus'].unique():
+    send_data(df_envio_turn, municipio_id_sus)
 
 
