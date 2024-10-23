@@ -74,7 +74,7 @@ df = pd.DataFrame(rows)
 # # Dados atualizados para confirmação de pendência
 query = """
     SELECT *
-    FROM `predictive-keep-314223.ip_mensageria_camada_prata.unificado_lista_com_telefones_grupos_atendimentos_`
+    FROM `predictive-keep-314223.ip_mensageria_camada_prata.unificado_lista_com_telefones_grupos_atendimentos`
 """
 query_job = client.query(query)
 rows = [dict(row) for row in query_job]
