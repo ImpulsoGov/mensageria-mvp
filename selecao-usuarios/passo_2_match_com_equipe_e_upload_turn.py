@@ -78,10 +78,82 @@ def send_data(df, municipio_id_sus):
 
 
 
+#### Consulta dos dados
+query = """
+    SELECT *
+    FROM `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens`
+"""
+
+query_job = client.query(query)
+rows = [dict(row) for row in query_job]
+df_historico_envio_mensagens = pd.DataFrame(rows)
+# carregando dados dos municipios da tabela do ibge
+query = """
+    SELECT *
+    FROM `predictive-keep-314223.lista_de_codigos.municipios_ibge`
+"""
+
+query_job = client.query(query)
+rows = [dict(row) for row in query_job]
+df_ibge = pd.DataFrame(rows)
+# carregando a view com dados da Turn io
+query = """
+    SELECT *
+    FROM `predictive-keep-314223.ip_mensageria_camada_prata.contact_details_turnio`
+"""
+
+query_job = client.query(query)
+rows = [dict(row) for row in query_job]
+df_contatos_turnio = pd.DataFrame(rows)
+
+
+
 #### Match
 # Une dados da tabela de seção diaria "ip_mensageria_camada_prata.historico_envio_mensagens" do BigQuery 
 # com os dados do estabelecimento que a pessoa é pertencente, por meio do dos dados que estão registradas 
 # na view "ip_mensageria_camada_prata.contact_details_turnio" no BigQuery.
+df_ibge['id_sus'] = df_ibge['id_sus'].astype(str)
+df_historico_envio_mensagens['municipio_id_sus'] = df_historico_envio_mensagens['municipio_id_sus'].astype(str)
+# merge da tabela de usuários com de municípios
+df_historico_envio_mensagens = pd.merge(df_historico_envio_mensagens, df_ibge[['id_sus','nome','uf_sigla']], left_on=['municipio_id_sus'],right_on=['id_sus'] , how='left')
+df_contatos_turnio[['municipio', 'uf']] = df_contatos_turnio['details_municipio'].str.split(' - ', expand=True)
+# equipes com preencimento dos dados
+df_contatos_turnio_preenchido = df_contatos_turnio[df_contatos_turnio['details_equipe_nome'].notnull()]
+df_contatos_turnio_preenchido = df_contatos_turnio_preenchido[['details_equipe_nome','municipio','uf']].drop_duplicates().reset_index(drop=True)
+# merge das tabelas de dados dos usuários e estabelecimento
+df = pd.merge(df_historico_envio_mensagens, df_contatos_turnio, left_on=['equipe_nome','municipio','uf_sigla'], right_on=['details_equipe_nome','municipio','uf'], how='left')
+df_envio_turn = df[['municipio',
+                    'uf_sigla',
+                    'municipio_id_sus',
+                    'equipe_ine',
+                    'equipe_nome',
+                    'linha_cuidado',
+                    'nome_do_paciente',
+                    'data_de_nascimento',
+                    'celular_tratado',
+                    'mvp_tipo_grupo',
+                    'mvp_data_envio',
+                    'mvp_grupo',
+                    'details_horarios_cronicos',
+                    'details_telefone',
+                    'details_estabelecimento_endereco',
+                    'details_estabelecimento_telefone',
+                    'details_estabelecimento_nome',
+                    'details_horarios_cito',
+                    'details_estabelecimento_documentos',
+                    'details_estabelecimento_horario'
+                    ]]
+
+df_envio_turn = df_envio_turn.rename(columns={'details_horarios_cronicos':'horarios_cronicos',
+                                              'details_telefone':'telefone',
+                                              'details_estabelecimento_endereco':'estabelecimento_endereco',
+                                              'details_estabelecimento_telefone':'estabelecimento_telefone',
+                                              'details_estabelecimento_nome':'estabelecimento_nome',
+                                              'details_horarios_cito':'horarios_cito',
+                                              'details_estabelecimento_documentos':'estabelecimento_documentos',
+                                              'details_estabelecimento_horario':'estabelecimento_horario'})
+df_envio_turn[['municipio_id_sus','municipio']].drop_duplicates()
+
 
 
 
