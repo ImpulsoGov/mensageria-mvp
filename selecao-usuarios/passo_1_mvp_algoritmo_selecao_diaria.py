@@ -49,15 +49,23 @@ def pendencia_cronicos(x):
         return True
     else:
         return False
-def dividir_grupos_equilibrado(df, num_grupos=3):
-    # Função para dividir os usuários em grupos de horários das mensagens
-    def dividir_municipio(grupo):
-        grupo_size = len(grupo)
-        grupos = np.tile(range(1, num_grupos + 1), grupo_size // num_grupos + 1)[:grupo_size]
-        np.random.shuffle(grupos)
-        return grupos
-    #considerando a divisão em equipes
-    df['horario_grupo'] = df.groupby('equipe_ine')['equipe_ine'].transform(dividir_municipio)
+def selecionar_usuarios(df, max_usuarios=15):
+    return df.groupby(['municipio', 'equipe_ine', 'linha_cuidado','grupo']).apply(
+        lambda x: x.sample(min(len(x), max_usuarios))
+    ).reset_index(drop=True)
+# função para dividir os grupos de horários
+def dividir_grupos_equilibrado(grupo, num_grupos=3):
+    grupo_size = len(grupo)
+    base_size = grupo_size // num_grupos
+    extra = grupo_size % num_grupos
+    grupos = np.array([i + 1 for i in range(num_grupos) for _ in range(base_size)])
+    grupos = np.concatenate([grupos, np.arange(1, extra + 1)])
+    np.random.shuffle(grupos)
+    return pd.Series(grupos, index=grupo.index)
+def distribuir_em_horarios(df, num_grupos=3):
+    df['horario_grupo'] = df.groupby(['municipio', 'equipe_ine', 'linha_cuidado','grupo'], group_keys=False).apply(
+        lambda x: dividir_grupos_equilibrado(x, num_grupos).astype(int)
+    )
     return df
 
 
@@ -114,6 +122,7 @@ if not(df_historico_envio_mensagens.empty):
     df_historico_envio_mensagens['chave_cidadao'] = df_historico_envio_mensagens['nome_do_paciente'].astype(str) + '_' + df_historico_envio_mensagens['data_de_nascimento'].astype(str)
     # Filtrando cidadãos que já receberam a mensagem
     df_filtrado = df_unificado[~df_unificado['chave_cidadao'].isin(df_historico_envio_mensagens['chave_cidadao'])]
+    df_filtrado = df_filtrado[~df_filtrado['celular_tratado'].isin(df_historico_envio_mensagens['celular_tratado'])]
 else:
     df_filtrado = df_unificado
 
@@ -121,10 +130,16 @@ else:
 ### Tratamento dos celulares
 # Filtrando casos com o celular preenchido incorreto
 df_filtrado = df_filtrado[df_filtrado['celular_tratado']!=0]
+df_filtrado = df_filtrado[df_filtrado['celular_tratado'].notnull()]
+df_filtrado = df_filtrado[df_filtrado['celular_tratado']!='0']
 # Adicionando 55 no início do telefone
 df_filtrado['celular_tratado'] = df_filtrado['celular_tratado'].astype(str)
 df_filtrado['caracteres_celular'] = df_filtrado['celular_tratado'].str.len()
 df_filtrado['celular_tratado'] = df_filtrado.apply(trata_celular,axis=1)
+df_filtrado = df_filtrado[~(df_filtrado['celular_tratado'].str.contains('00000000') | df_filtrado['celular_tratado'].str.contains('99999999'))]
+# Garantindo a não duplicação de celulares
+df_filtrado = df_filtrado.drop_duplicates().reset_index(drop=True)
+df_filtrado = df_filtrado.drop_duplicates(subset=['celular_tratado']).reset_index(drop=True)
 # Data de último exame
 df_filtrado['data_exame_cito'] = df_filtrado['data_exame_cito'].astype('datetime64[ns]')
 df_filtrado['data_afericao_hipertensos'] = df_filtrado['data_afericao_hipertensos'].astype('datetime64[ns]')
@@ -134,9 +149,8 @@ df_filtrado['data_ultimo_exame'] = df_filtrado.apply(ultimo_exame,axis=1)
 
 
 #### Divisão por horários
-df_dividido = dividir_grupos_equilibrado(df_filtrado)
-# Máximo de 15 pessoas por equipe, dia e linha de cuidado -> máximo de 5 pessoas por horário, equipe, dia e linha de cuidado
-df_envio_diario = df_dividido.groupby(['municipio','equipe_ine','linha_cuidado','horario_grupo','grupo']).apply(lambda x: x.sample(min(len(x), 5))).reset_index(drop=True)
+df_selecionados = selecionar_usuarios(df_filtrado, max_usuarios=15)
+df_envio_diario = distribuir_em_horarios(df_selecionados)
 # Ajuste no formato da coluna de tipo de grupo
 dia_semana = datetime.now().strftime('%a').upper()
 df_envio_diario['mvp_tipo_grupo'] = dia_semana+'_H'+df_envio_diario['horario_grupo'].astype(str).str.zfill(2)
