@@ -14,7 +14,6 @@ from google.cloud import bigquery
 import requests
 import json
 import time
-from dotenv import load_dotenv
 import os
 credentials = service_account.Credentials.from_service_account_file('credencial_bigquery.json')
 project_id = 'predictive-keep-314223'
@@ -81,7 +80,7 @@ def send_data(df, municipio_id_sus):
 #### Consulta dos dados
 query = """
     SELECT *
-    FROM `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens`
+    FROM `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens_teste`
 """
 
 query_job = client.query(query)
@@ -105,7 +104,6 @@ query = """
 query_job = client.query(query)
 rows = [dict(row) for row in query_job]
 df_contatos_turnio = pd.DataFrame(rows)
-
 
 
 #### Match
