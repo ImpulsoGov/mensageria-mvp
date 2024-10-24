@@ -12,6 +12,9 @@ from google.oauth2 import service_account
 from datetime import datetime
 from google.cloud import bigquery
 import pandas as pd
+from dotenv import load_dotenv
+load_dotenv()
+
 tokens_municipios = [
     {"municipio": "Paulo Ramos", "id_sus": "210810", "token": os.getenv('ENV_PAULORAMOS_MA')},
     {"municipio": "Pacoti", "id_sus": "210810", "token": os.getenv('ENV_PACOTI_CE')},
@@ -43,6 +46,17 @@ def seleciona_template_por_linha_de_cuidado(linha_de_cuidado, municipio):
             },
             "components": [
                 {
+                    "type": "header",
+                    "parameters": [
+                        {
+                            "type": "image",
+                            "image": {
+                                "link": "https://url.com/video-file.mp4"
+                            }
+                        }
+                    ]
+                },
+                {
                     "type": "body",
                     "parameters": [
                         {
@@ -67,6 +81,17 @@ def seleciona_template_por_linha_de_cuidado(linha_de_cuidado, municipio):
             },
             "components": [
                 {
+                    "type": "header",
+                    "parameters": [
+                        {
+                            "type": "video",
+                            "video": {
+                                "link": "https://url.com/video-file.mp4"
+                            }
+                        }
+                    ]
+                },
+                {
                     "type": "body",
                     "parameters": [
                         {
@@ -90,12 +115,22 @@ def envia_mensagem(token, whatsapp_id, template):
         'Accept': 'application/vnd.v1+json',
         'Content-Type': 'application/json'
     }
-    dados_de_envio = {
-        "to" : whatsapp_id,
-        "type" : "template",
-        "template" : template
+    # dados_de_envio = {
+    #     "to" : whatsapp_id,
+    #     "type" : "template",
+    #     "template" : template
+    # }
+    # response = requests.post(URL_API_MENSAGENS, headers=headers, data=json.dumps(dados_de_envio))
+    data = {
+      "preview_url": False,
+      "recipient_type": "individual",
+      "to": whatsapp_id,
+      "type": "text",
+      "text": {"body": "Este número pertence a ImpulsoGov."}
     }
-    response = requests.post(URL_API_MENSAGENS, headers=headers, data=json.dumps(dados_de_envio))
+    url = 'https://whatsapp.turn.io/v1/messages'
+    response = requests.post(URL_API_MENSAGENS, headers=headers, json=data)
+    time.sleep(1)
     if response.status_code == 201 or response.status_code == 200:
         print(f"Mensagem enviada para {whatsapp_id}")
     else:
@@ -129,7 +164,6 @@ for i in range(df_historico_envio_mensagens.size):
         linha_cuidado = df_historico_envio_mensagens.loc[i]["linha_cuidado"]
         template_linha_cuidado = "mensageria_usuarios_campanha_citopatologico_v01" if linha_cuidado == "cito" else "mensageria_usuarios_campanha_cronicos_v0"
         celular_tratado = df_historico_envio_mensagens.loc[i]["celular_tratado"]
-        import pdb; pdb.set_trace()
         template = seleciona_template_por_linha_de_cuidado(template_linha_cuidado, df_historico_envio_mensagens.loc[i]["municipio"])
         envia_mensagem(token_municipio, token_municipio, template)
     except:

@@ -14,6 +14,8 @@ from google.oauth2 import service_account
 from datetime import datetime
 import locale
 from google.cloud import bigquery
+from dotenv import load_dotenv
+load_dotenv()
 credentials = service_account.Credentials.from_service_account_file('credencial_bigquery.json')
 project_id = 'predictive-keep-314223'
 client = bigquery.Client(credentials= credentials,project=project_id)

@@ -15,6 +15,8 @@ import requests
 import json
 import time
 import os
+from dotenv import load_dotenv
+load_dotenv()
 credentials = service_account.Credentials.from_service_account_file('credencial_bigquery.json')
 project_id = 'predictive-keep-314223'
 client = bigquery.Client(credentials= credentials,project=project_id)
