@@ -160,7 +160,7 @@ df_envio_diario= df_envio_diario.rename(columns={'grupo':'mvp_grupo'})
 df_envio_diario['data_ultimo_exame_cito'] = df_envio_diario['data_exame_cito'].astype('datetime64[ns]')
 df_envio_diario['data_ultima_afericao_hipertensos'] = df_envio_diario['data_afericao_hipertensos'].astype('datetime64[ns]')
 df_envio_diario['data_ultimo_exame_diabeticos'] = df_envio_diario['data_exame_diabeticos'].astype('datetime64[ns]')
-df_envio_dia_atual = df_envio_diario[['municipio','municipio_id_sus', 'equipe_ine', 'equipe_nome', 'linha_cuidado','nome_do_paciente','data_de_nascimento','celular_tratado','mvp_tipo_grupo','mvp_grupo','numero_visitas_ubs_ultimos_12_meses','data_ultimo_exame']]
+df_envio_dia_atual = df_envio_diario[['municipio','municipio_id_sus', 'equipe_ine', 'equipe_nome', 'linha_cuidado','nome_do_paciente','data_de_nascimento','celular_tratado','mvp_tipo_grupo','mvp_grupo','numero_visitas_ubs_ultimos_12_meses','data_ultimo_exame_cito','data_ultima_afericao_hipertensos','data_ultimo_exame_diabeticos']]
 df_envio_dia_atual['mvp_data_envio'] = datetime.today().strftime('%Y-%m-%d')
 df_envio_dia_atual['mvp_data_envio'] = df_envio_dia_atual['mvp_data_envio'].astype('datetime64[ns]')
 df_envio_dia_atual['celular_tratado'] = df_envio_dia_atual['celular_tratado'].astype(str)
