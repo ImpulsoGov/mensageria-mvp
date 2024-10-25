@@ -3,7 +3,7 @@ name: Build e Deploy para Google Cloud Run
 on:
   push:
     branches:
-      - feat/pipeline
+      - main
 
 jobs:
   build:
