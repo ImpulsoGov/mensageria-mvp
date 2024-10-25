@@ -15,6 +15,9 @@ import requests
 import json
 import time
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 credentials = service_account.Credentials.from_service_account_file('credencial_bigquery.json')
 project_id = 'predictive-keep-314223'
 client = bigquery.Client(credentials= credentials,project=project_id)
@@ -22,14 +25,8 @@ client = bigquery.Client(credentials= credentials,project=project_id)
 
 
 #### Funcoes
-def get_token(municipio_id_sus):
-    for token_info in tokens_municipios:
-        if token_info['id_sus'] == municipio_id_sus:
-            return token_info['token']
-    return None
-
 def send_data(df, municipio_id_sus):
-    token = get_token(municipio_id_sus)
+    token = next((municipio["token"] for municipio in tokens_municipios if municipio["id_sus"] == municipio_id_sus), None) 
     if not token:
         print(f"Token não encontrado para {municipio_id_sus}")
         return
@@ -60,27 +57,26 @@ def send_data(df, municipio_id_sus):
             continue
 
         time.sleep(1)
-        import pdb; pdb.set_trace()
 
         #atualiza opted_in
         json_data_profile = {
             "opted_in": True,
-            "nome_do_paciente": df['nome_do_paciente'],
-            "linha_de_cuidado": df['linha_cuidado'] ,
-            "municipio": df['municipio'],
-            "municipio_id_sus": df['municipio_id_sus'],
-            "equipe_ine": df['equipe_ine'],
-            "equipe_nome": df['equipe_nome'],
-            "mvp_tipo_grupo": df['mvp_tipo_grupo'],
-            "mvp_data_envio": df['mvp_data_envio'],
-            "mvp_grupo": df['mvp_grupo'],
-            "estabelecimento_horario": df['estabelecimento_horario'],
-            "estabelecimento_documentos": df['estabelecimento_documentos'],
-            "estabelecimento_nome": df['estabelecimento_nome'],
-            "estabelecimento_endereco": df['estabelecimento_endereco'],
-            "estabelecimento_telefone": df['estabelecimento_telefone'],
-            "horarios_cronicos": df['horarios_cronicos'],
-            "horarios_cito": df['horarios_cito']
+            "nome_do_paciente": row.nome_do_paciente,
+            "linha_de_cuidado": row.linha_cuidado ,
+            "municipio": row.municipio,
+            "municipio_id_sus": row.municipio_id_sus,
+            "equipe_ine": row.equipe_ine,
+            "equipe_nome": row.equipe_nome,
+            "mvp_tipo_grupo": row.mvp_tipo_grupo,
+            "mvp_data_envio": row.mvp_data_envio.strftime("%Y-%m-%d %H:%M:%S"),
+            "mvp_grupo": row.mvp_grupo,
+            "estabelecimento_horario": row.estabelecimento_horario,
+            "estabelecimento_documentos": row.estabelecimento_documentos,
+            "estabelecimento_nome": row.estabelecimento_nome,
+            "estabelecimento_endereco": row.estabelecimento_endereco,
+            "estabelecimento_telefone": row.estabelecimento_telefone,
+            "horarios_cronicos": row.horarios_cronicos,
+            "horarios_cito": row.horarios_cito
         }
         url_profile = f'https://whatsapp.turn.io/v1/contacts/{row.celular_tratado}/profile'
 
