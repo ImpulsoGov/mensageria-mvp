@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "mensageria-mvp"
+version = "0.1.0"
+description = ""
+authors = ["WaltMath <wmatheus.97@gmail.com>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "^2.2.3"
+gunicorn = "^23.0.0"
+numpy = "^2.1.2"
+requests = "^2.32.3"
+google-cloud-bigquery = "^3.26.0"
+flask = "^3.0.3"
+waitress = "^3.0.0"
+python-dotenv = "^1.0.1"
+google-cloud-secret-manager = "^2.21.0"
+
+
+[virtualenvs]
+path = ".venv"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

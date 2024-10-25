@@ -3,7 +3,7 @@ name: Build e Deploy para Google Cloud Run
 on:
   push:
     branches:
-      - main
+      - feat/pipeline
 
 jobs:
   build:
@@ -27,17 +27,48 @@ jobs:
         run: |
           gcloud auth configure-docker us-central1-docker.pkg.dev
 
-      - name: Construir Imagem Docker
+      - name: Build and push Docker image
+        env:
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          TEMPLATE_NAMESPACE: ${{ secrets.TEMPLATE_NAMESPACE }}
+          ENV_PAULORAMOS_MA: ${{ secrets.ENV_PAULORAMOS_MA }}
+          ENV_LAGOVERDE_MA: ${{ secrets.ENV_LAGOVERDE_MA }}
+          ENV_PACOTI_CE: ${{ secrets.ENV_PACOTI_CE }}
+          ENV_MONSENHORTABOSA_CE: ${{ secrets.ENV_MONSENHORTABOSA_CE }}
+          ENV_MARAJADOSENA_MA: ${{ secrets.ENV_MARAJADOSENA_MA }}
+          ENV_ALAGOINHA_PE: ${{ secrets.ENV_ALAGOINHA_PE }}
+          ENV_BARAUNA_RN: ${{ secrets.ENV_BARAUNA_RN }}
+          ENV_JUCURUCU_BA: ${{ secrets.ENV_JUCURUCU_BA }}
+          ENV_VITORINOFREIRE_MA: ${{ secrets.ENV_VITORINOFREIRE_MA }}
+          ENV_BREJODEAREIA_MA: ${{ secrets.ENV_BREJODEAREIA_MA }}
+          ENV_OIAPOQUE_AP: ${{ secrets.ENV_OIAPOQUE_AP }}
+          ENV_TARRAFAS_CE: ${{ secrets.ENV_TARRAFAS_CE }}
+          ENV_SALVATERRA_PA: ${{ secrets.ENV_SALVATERRA_PA }}
+          ENV_LAGOADOOURO_PE: ${{ secrets.ENV_LAGOADOOURO_PE }}
         run: |
-          docker build -t mesageria-mvp:latest .
-
-      - name: Adicionar Tag à Imagem Docker
-        run: |
-          docker tag mesageria-mvp:latest us-central1-docker.pkg.dev/predictive-keep-314223/mesageria-mvp/mesageria-mvp:latest
+          docker build \
+            --build-arg PROJECT_ID=$PROJECT_ID \
+            --build-arg TEMPLATE_NAMESPACE=$TEMPLATE_NAMESPACE \
+            --build-arg ENV_PAULORAMOS_MA=$ENV_PAULORAMOS_MA \
+            --build-arg ENV_LAGOVERDE_MA=$ENV_LAGOVERDE_MA \
+            --build-arg ENV_PACOTI_CE=$ENV_PACOTI_CE \
+            --build-arg ENV_MONSENHORTABOSA_CE=$ENV_MONSENHORTABOSA_CE \
+            --build-arg ENV_MARAJADOSENA_MA=$ENV_MARAJADOSENA_MA \
+            --build-arg ENV_ALAGOINHA_PE=$ENV_ALAGOINHA_PE \
+            --build-arg ENV_BARAUNA_RN=$ENV_BARAUNA_RN \
+            --build-arg ENV_JUCURUCU_BA=$ENV_JUCURUCU_BA \
+            --build-arg ENV_VITORINOFREIRE_MA=$ENV_VITORINOFREIRE_MA \
+            --build-arg ENV_BREJODEAREIA_MA=$ENV_BREJODEAREIA_MA \
+            --build-arg ENV_OIAPOQUE_AP=$ENV_OIAPOQUE_AP \
+            --build-arg ENV_TARRAFAS_CE=$ENV_TARRAFAS_CE \
+            --build-arg ENV_SALVATERRA_PA=$ENV_SALVATERRA_PA \
+            --build-arg ENV_LAGOADOOURO_PE=$ENV_LAGOADOOURO_PE \
+            -t us-central1-docker.pkg.dev/predictive-keep-314223/mensageria-mvp/mensageria-mvp:latest .
+          docker push us-central1-docker.pkg.dev/predictive-keep-314223/mensageria-mvp/mensageria-mvp:latest
 
       - name: Enviar Imagem Docker
         run: |
-          docker push us-central1-docker.pkg.dev/predictive-keep-314223/mesageria-mvp/mesageria-mvp:latest
+          docker push us-central1-docker.pkg.dev/predictive-keep-314223/mensageria-mvp/mensageria-mvp:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -56,8 +87,9 @@ jobs:
 
       - name: Fazer Deploy no Google Cloud Run
         run: |
-          gcloud run deploy mesageria-mvp-staging \
-            --image="us-central1-docker.pkg.dev/predictive-keep-314223/mesageria-mvp/mesageria-mvp:latest" \
+          gcloud run deploy mesageria-mvp \
+            --image="us-central1-docker.pkg.dev/predictive-keep-314223/mensageria-mvp/mensageria-mvp:latest" \
             --region=us-central1 \
             --platform=managed \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --project=predictive-keep-314223
