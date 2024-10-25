@@ -50,7 +50,7 @@ def send_data(df, municipio_id_sus):
             "recipient_type": "individual",
             "to": str(row.celular_tratado),
             "type": "text",
-            "text": {"body": "Este número pertence a ImpulsoGov."}
+            "text": {"body": "Você está registrado em um programa de campanhas de saúde do seu municipio."}
         }
         url_message = 'https://whatsapp.turn.io/v1/messages'
 
@@ -82,7 +82,8 @@ def send_data(df, municipio_id_sus):
 #### Consulta dos dados
 query = """
     SELECT *
-    FROM `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens_teste`
+    FROM `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens`
+    WHERE mvp_data_envio = current_date() and mvp_grupo = "teste"
 """
 
 query_job = client.query(query)
