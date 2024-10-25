@@ -64,6 +64,22 @@ def send_data(df, municipio_id_sus):
         #atualiza opted_in
         json_data_profile = {
             "opted_in": True,
+            "nome_do_paciente": df['nome_do_paciente'],
+            "linha_de_cuidado": df['linha_cuidado'] ,
+            "municipio": df['municipio'],
+            "municipio_id_sus": df['municipio_id_sus'],
+            "equipe_ine": df['equipe_ine'],
+            "equipe_nome": df['equipe_nome'],
+            "mvp_tipo_grupo": df['mvp_tipo_grupo'],
+            "mvp_data_envio": df['mvp_data_envio'],
+            "mvp_grupo": df['mvp_grupo'],
+            "estabelecimento_horario": df['estabelecimento_horario'],
+            "estabelecimento_documentos": df['estabelecimento_documentos'],
+            "estabelecimento_nome": df['estabelecimento_nome'],
+            "estabelecimento_endereco": df['estabelecimento_endereco'],
+            "estabelecimento_telefone": df['estabelecimento_telefone'],
+            "horarios_cronicos": df['horarios_cronicos'],
+            "horarios_cito": df['horarios_cito']
         }
         url_profile = f'https://whatsapp.turn.io/v1/contacts/{row.celular_tratado}/profile'
 
@@ -81,6 +97,8 @@ def send_data(df, municipio_id_sus):
 query = """
     SELECT *
     FROM `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens_teste`
+    WHERE mvp_data_envio = current_date("America/Sao_Paulo")
+    AND mvp_grupo='teste'
 """
 
 query_job = client.query(query)
