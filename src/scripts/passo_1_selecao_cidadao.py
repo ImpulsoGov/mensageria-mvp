@@ -1,8 +1,8 @@
-import pandas as pd
 from google.cloud import bigquery
-import numpy as np
-from typing import Any,Tuple
 import json
+import numpy as np
+import pandas as pd
+from typing import Any,Tuple
 
 from src.bd import BigQueryClient
 
@@ -12,6 +12,7 @@ def identificar_pendencias(df_pendencias: pd.DataFrame) -> pd.DataFrame:
         lambda x: True if x in ('exame_nunca_realizado', 'exame_vencido', 'exame_vence_no_quadrimestre_atual') else False
     )
     df_pendencias['cronicos_pendente_atual'] = df_pendencias.apply(pendencia_cronicos, axis=1)
+
     return df_pendencias
 
 # Função para verificar pendência de crônicos
@@ -113,41 +114,41 @@ def atualizar_historico(client: bigquery.Client, df: pd.DataFrame, table_id: str
     job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
     client.load_table_from_dataframe(df, table_id, job_config=job_config)
 
-def processa_passo_1(project_id: str) -> Tuple[str, int, dict]:
+def selecionar_cidadaos(project_id: str) -> Tuple[str, int, dict]:
     """
     Função que processa diariamente o envio de mensagens para cidadãos de acordo com critérios definidos.
     
     Args:
-        request (Request): Objeto de requisição HTTP contendo os dados do projeto e credenciais.
+        project_id (str): O ID do projeto no BigQuery.
     
     Returns:
         Tuple[str, int, dict]: Resposta HTTP contendo o status, mensagem e os dados processados.
     """
     # 1. Configurar ambiente
-    bq_client = BigQueryClient()
-    client = bq_client.configurar_ambiente()
-    
+    bq_client = BigQueryClient()  # Crie uma instância do cliente
+    client = bq_client.client  # Use o cliente já configurado
+
     # 2. Consultar dados
     query_df = f"SELECT * FROM `{project_id}.ip_mensageria_camada_prata.divisao_teste_controle_equipes`"
-    df: pd.DataFrame = bq_client.bq_client.consultar_dados(client, query_df)
-    
+    df: pd.DataFrame = bq_client.consultar_dados(query_df)  # Use o método correto
+
     query_df_pendencias = f"SELECT * FROM `{project_id}.ip_mensageria_camada_prata.unificado_lista_com_telefones_grupos_atendimentos_`"
-    df_pendencias: pd.DataFrame = bq_client.consultar_dados(client, query_df_pendencias)
-    
+    df_pendencias: pd.DataFrame = bq_client.consultar_dados(query_df_pendencias)
+
     query_df_historico_envio_mensagens = f"SELECT * FROM `{project_id}.ip_mensageria_camada_prata.historico_envio_mensagens`"
-    df_historico_envio_mensagens: pd.DataFrame = bq_client.consultar_dados(client, query_df_historico_envio_mensagens)
-    
+    df_historico_envio_mensagens: pd.DataFrame = bq_client.consultar_dados(query_df_historico_envio_mensagens)
+
     # 3. Preparar dados
     df_pendencias = identificar_pendencias(df_pendencias)
     df_unificado: pd.DataFrame = unificar_dados(df, df_pendencias)
     df_filtrado: pd.DataFrame = filtrar_historico(df_unificado, df_historico_envio_mensagens)
     df_filtrado: pd.DataFrame = tratar_telefones(df_filtrado)
     df_filtrado: pd.DataFrame = processar_exames(df_filtrado)
-    
+
     # 4. Dividir e selecionar cidadãos para envio
     df_dividido: pd.DataFrame = dividir_grupos_equilibrado(df_filtrado)
     df_envio_diario: pd.DataFrame = selecionar_cidadaos_para_envio(df_dividido)
-    
+
     # 5. Preparar dados para envio e atualizar histórico
     df_envio_dia_atual: pd.DataFrame = preparar_para_envio(df_envio_diario)
     atualizar_historico(client, df_envio_dia_atual, f"{project_id}.ip_mensageria_camada_prata.historico_envio_mensagens")
@@ -156,5 +157,4 @@ def processa_passo_1(project_id: str) -> Tuple[str, int, dict]:
     return json.dumps({
         'status': 'sucesso',
         'mensagem': 'Dados processados e histórico atualizado.',
-        'dados_enviados': df_envio_dia_atual.to_dict(orient='records')
     }), 200, {'Content-Type': 'application/json'}
