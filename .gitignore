@@ -1,3 +1,4 @@
 .env
 credencial_bigquery.json
+credenciais.json
 venv/
