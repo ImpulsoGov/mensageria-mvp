@@ -147,7 +147,6 @@ df_filtrado = df_filtrado.drop_duplicates(subset=['celular_tratado']).reset_inde
 df_filtrado['data_exame_cito'] = df_filtrado['data_exame_cito'].astype('datetime64[ns]')
 df_filtrado['data_afericao_hipertensos'] = df_filtrado['data_afericao_hipertensos'].astype('datetime64[ns]')
 df_filtrado['data_exame_diabeticos'] = df_filtrado['data_exame_diabeticos'].astype('datetime64[ns]')
-df_filtrado['data_ultimo_exame'] = df_filtrado.apply(ultimo_exame,axis=1)
 
 
 
@@ -158,6 +157,9 @@ df_envio_diario = distribuir_em_horarios(df_selecionados)
 dia_semana = datetime.now().strftime('%a').upper()
 df_envio_diario['mvp_tipo_grupo'] = dia_semana+'_H'+df_envio_diario['horario_grupo'].astype(str).str.zfill(2)
 df_envio_diario= df_envio_diario.rename(columns={'grupo':'mvp_grupo'})
+df_envio_diario['data_ultimo_exame_cito'] = df_envio_diario['data_exame_cito'].astype('datetime64[ns]')
+df_envio_diario['data_ultima_afericao_hipertensos'] = df_envio_diario['data_afericao_hipertensos'].astype('datetime64[ns]')
+df_envio_diario['data_ultimo_exame_diabeticos'] = df_envio_diario['data_exame_diabeticos'].astype('datetime64[ns]')
 df_envio_dia_atual = df_envio_diario[['municipio','municipio_id_sus', 'equipe_ine', 'equipe_nome', 'linha_cuidado','nome_do_paciente','data_de_nascimento','celular_tratado','mvp_tipo_grupo','mvp_grupo','numero_visitas_ubs_ultimos_12_meses','data_ultimo_exame']]
 df_envio_dia_atual['mvp_data_envio'] = datetime.today().strftime('%Y-%m-%d')
 df_envio_dia_atual['mvp_data_envio'] = df_envio_dia_atual['mvp_data_envio'].astype('datetime64[ns]')
@@ -166,7 +168,6 @@ df_envio_dia_atual['mvp_tipo_grupo'] = df_envio_dia_atual['mvp_tipo_grupo'].asty
 df_envio_dia_atual['mvp_data_envio'] = df_envio_dia_atual['mvp_data_envio'].astype('datetime64[ns]')
 df_envio_dia_atual['mvp_grupo'] = df_envio_dia_atual['mvp_grupo'].astype('str')
 df_envio_dia_atual['numero_visitas_ubs_ultimos_12_meses'] = df_envio_dia_atual['numero_visitas_ubs_ultimos_12_meses'].astype(int)
-df_envio_dia_atual['data_ultimo_exame'] = pd.to_datetime(df_envio_dia_atual['data_ultimo_exame'], errors='coerce')
 df_envio_dia_atual['data_de_nascimento'] = pd.to_datetime(df_envio_dia_atual['data_de_nascimento'], errors='coerce')
 # Adicionar dados na tabela de histórico
 table_id = "predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens"
