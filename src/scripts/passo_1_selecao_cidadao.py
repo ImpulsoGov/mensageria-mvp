@@ -3,7 +3,6 @@ import json
 import numpy as np
 import pandas as pd
 from typing import Any,Tuple
-
 from src.bd import BigQueryClient
 
 # Função para identificar pendências nas linhas de cuidado
