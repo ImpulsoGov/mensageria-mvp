@@ -95,7 +95,7 @@ def passo3():
         logger.info("Processo iniciado")
         resultado = programa_mensagens()
         if resultado["status"] == "sucesso":
-        logger.info("Processo finalizado")
+            logger.info("Processo finalizado")
     except Exception as e:
         logger.error(f"Extração falhou. Exceção: {e}")
         return jsonify({f"erro": f"Erro do servidor: {str(e)}"}), 500
