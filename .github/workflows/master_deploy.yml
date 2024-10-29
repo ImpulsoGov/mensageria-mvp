@@ -90,6 +90,7 @@ jobs:
           gcloud run deploy mesageria-mvp \
             --image="us-central1-docker.pkg.dev/predictive-keep-314223/mensageria-mvp/mensageria-mvp:latest" \
             --region=us-central1 \
+            --memory=2gi \
             --platform=managed \
             --allow-unauthenticated \
             --project=predictive-keep-314223
