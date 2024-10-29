@@ -149,9 +149,10 @@ def programa_mensagens() -> None:
     contatos = seleciona_horario(contatos)
     for index, row in contatos.iterrows():
         try:
-            token_municipio = next((municipio["token"] for municipio in tokens_municipios if municipio["municipio"] == row["municipio"]), None)
-            template = seleciona_template_por_linha_de_cuidado(row.to_dict())
-            envia_mensagem(token_municipio, row.to_dict(), template)
+            contato = row.to_dict() 
+            token_municipio = next((municipio["token"] for municipio in tokens_municipios if municipio["municipio"] == contato.get("municipio")), None)
+            template = seleciona_template_por_linha_de_cuidado(contato)
+            envia_mensagem(token_municipio, contato, template)
         except Exception as e:
             print(f"Erro no envio do contato: {e}")
     return json.dumps({
