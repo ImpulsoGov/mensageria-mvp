@@ -63,7 +63,7 @@ def distribuir_em_horarios(df, num_grupos=3):
         lambda x: dividir_grupos_equilibrado(x, num_grupos).astype(int)
     )
     return df
-def selecionar_cidadaos(project_id: str) -> Tuple[str, int, dict]:
+def selecionar_cidadaos() -> Tuple[str, int, dict]:
     """
     Função que processa diariamente o envio de mensagens para cidadãos de acordo com critérios definidos.
     
