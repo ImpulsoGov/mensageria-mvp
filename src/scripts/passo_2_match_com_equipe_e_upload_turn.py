@@ -9,6 +9,8 @@ import io
 import numpy as np
 import requests
 import os
+import time
+import json
 from typing import List, Dict, Tuple
 from src.bd import BigQueryClient
 from datetime import datetime
