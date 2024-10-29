@@ -102,6 +102,10 @@ def envia_mensagem(token, contato, template):
     response = requests.post(URL_API_MENSAGENS, headers=headers, data=json.dumps(dados_de_envio))
     time.sleep(1)
 
+    # 1. Configurar ambiente
+    bq_client = BigQueryClient()  # Crie uma instância do cliente
+    client = bq_client.client  # Use o cliente já configurado
+
     # update_query = f"""UPDATE `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens` SET mvp_status_envio = "{response.status_code}" WHERE celular_tratado = "{str(contato["celular_tratado"])}" and mvp_data_envio = "{str(contato["mvp_data_envio"])}";"""
     update_query = f"""UPDATE `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens_teste` SET mvp_status_envio = "{response.status_code}" WHERE celular_tratado = {str(contato["celular_tratado"])} and mvp_data_envio = "{str(contato["mvp_data_envio"])}" and municipio = "{contato["municipio"]}";"""
     update_job = client.query(update_query)
@@ -109,7 +113,7 @@ def envia_mensagem(token, contato, template):
         print(f"Mensagem enviada para {whatsapp_id}")
     else:
         print(f"Falha ao enviar mensagem para {whatsapp_id}: {response.status_code}, {response.text}")
-def seleciona_horario(contato):
+def seleciona_horario(contatos):
     status_respostas_unicas = contatos.groupby("mvp_tipo_grupo")["mvp_status_envio"].apply(lambda x: list(x.unique())).reset_index()
     if not status_respostas_unicas[(status_respostas_unicas["mvp_tipo_grupo"].str.contains("H01")) & (status_respostas_unicas["mvp_status_envio"].apply(lambda x: x == [None]))].empty:
         return contatos[contatos['mvp_tipo_grupo'].str.contains("H01")]
@@ -130,6 +134,11 @@ def programa_mensagens() -> None:
     #     FROM `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens`
     #     WHERE mvp_grupo = "teste" and mvp_data_envio = current_date("America/Sao_Paulo")
     # """
+
+    #Configurar ambiente
+    bq_client = BigQueryClient()  # Crie uma instância do cliente
+    client = bq_client.client  # Use o cliente já configurado
+
     query = """
         SELECT *
         FROM `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens_teste`
