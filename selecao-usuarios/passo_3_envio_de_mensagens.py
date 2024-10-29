@@ -52,7 +52,7 @@ def seleciona_template_por_linha_de_cuidado(contato):
     elif contato['linha_cuidado'] == "cronicos":
         template_nome = nome_template_cronicos
         type_header="video"
-        link_media= "https://avatars.githubusercontent.com/u/63020100?s=280&v=4"
+        link_media= "https://i.imgur.com/gHWgdG4.mp4"
     else:
         return None
     template = {
@@ -113,14 +113,18 @@ def envia_mensagem(token, contato, template):
     else:
         print(f"Falha ao enviar mensagem para {whatsapp_id}: {response.status_code}, {response.text}")
 def seleciona_horario(contato):
-    contatos_envio = contato[contato['mvp_status_envio'].notna()]
-    horarios_enviados = contatos_envio['mvp_tipo_grupo'].unique()
-    if horarios_enviados.size == 0:
+    status_respostas_unicas = contatos.groupby("mvp_tipo_grupo")["mvp_status_envio"].apply(lambda x: list(x.unique())).reset_index()
+    if not status_respostas_unicas[(status_respostas_unicas["mvp_tipo_grupo"].str.contains("H01")) & (status_respostas_unicas["mvp_status_envio"].apply(lambda x: x == [None]))].empty:
         return contatos[contatos['mvp_tipo_grupo'].str.contains("H01")]
-    elif horarios_enviados.astype(str).str.contains("H01")== True and horarios_enviados.astype(str).str.contains("H02")== False:
-        return contatos[contatos['mvp_tipo_grupo'].str.contains("H02")]
+    elif not status_respostas_unicas[(status_respostas_unicas["mvp_tipo_grupo"].str.contains("H02")) & (status_respostas_unicas["mvp_status_envio"].apply(lambda x: x == [None]))].empty:
+        resultado = contatos[(contatos['mvp_tipo_grupo'].str.contains("H02")) | 
+                            ((contatos['mvp_tipo_grupo'].str.contains("H01")) & (contatos['mvp_status_envio'].isna()))]
+        return resultado
     else:
-        return contatos[contatos['mvp_tipo_grupo'].str.contains("H03")]
+        resultado = contatos[(contatos['mvp_tipo_grupo'].str.contains("H03")) | 
+                            ((contatos['mvp_tipo_grupo'].str.contains("H02")) & (contatos['mvp_status_envio'].isna())) | 
+                            ((contatos['mvp_tipo_grupo'].str.contains("H01")) & (contatos['mvp_status_envio'].isna()))]
+        return resultado
 
 
 
@@ -142,8 +146,8 @@ contatos = pd.DataFrame(rows)
 contatos['whatsapp_id'] = contatos['celular_tratado']
 
 
-# contatos = seleciona_horario(contatos)
-# import pdb; pdb.set_trace()
+contatos = seleciona_horario(contatos)
+import pdb; pdb.set_trace()
 #### Programa a mensagem
 for i in range(len(contatos.index)):
     try:
