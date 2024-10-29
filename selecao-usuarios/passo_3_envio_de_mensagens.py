@@ -9,10 +9,11 @@ import os
 import requests
 import json
 import time
-from google.oauth2 import service_account
 from datetime import datetime
-from google.cloud import bigquery
 import pandas as pd
+
+from google.oauth2 import service_account
+from google.cloud import bigquery
 from dotenv import load_dotenv
 load_dotenv()
 
