@@ -178,7 +178,7 @@ def processo_envio_turn() -> None:
     for municipio_id_sus in df_envio_turn['municipio_id_sus'].unique():
         send_data(df_envio_turn, municipio_id_sus)
     # Retornar sucesso com os dados preparados
-    return json.dumps({
+    return {
         'status': 'sucesso',
-        'mensagem': 'Dados enviados para TurnIO.'
-    }), 200, {'Content-Type': 'application/json'}
+        'mensagem': 'Mensagens enviadas para os cidadãos.'
+    }
