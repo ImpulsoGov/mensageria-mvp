@@ -147,13 +147,13 @@ def programa_mensagens() -> None:
     contatos: pd.DataFrame = bq_client.consultar_dados(query)    
     contatos['whatsapp_id'] = contatos['celular_tratado']
     contatos = seleciona_horario(contatos)
-    for i in range(len(contatos.index)):
+    for index, row in contatos.iterrows():
         try:
-            token_municipio = next((municipio["token"] for municipio in tokens_municipios if municipio["municipio"] == contatos.loc[i]["municipio"]), None)
-            template = seleciona_template_por_linha_de_cuidado(contatos.loc[i])
-            envia_mensagem(token_municipio, contatos.loc[i], template)
-        except:
-            print(f"Erro no envio do contato")
+            token_municipio = next((municipio["token"] for municipio in tokens_municipios if municipio["municipio"] == row["municipio"]), None)
+            template = seleciona_template_por_linha_de_cuidado(row.to_dict())
+            envia_mensagem(token_municipio, row.to_dict(), template)
+        except Exception as e:
+            print(f"Erro no envio do contato: {e}")
     return json.dumps({
         'status': 'sucesso',
         'mensagem': 'Mensagens enviados para o cidadão.'
