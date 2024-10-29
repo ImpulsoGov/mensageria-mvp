@@ -52,8 +52,9 @@ def passo1():
             return jsonify({"error": "Chave de API inválida"}), 401
         logger.info("Processo iniciado")
         resultado = selecionar_cidadaos()
-        if resultado["status"] == "sucesso":
+        if resultado.get("status") == "sucesso":
             logger.info("Processo finalizado")
+            return jsonify(resultado), 200
     except Exception as e:
         logger.error(f"Extração falhou. Exceção: {e}")
         return jsonify({f"erro": f"Erro do servidor: {str(e)}"}), 500
@@ -73,8 +74,9 @@ def passo2():
             return jsonify({"error": "Chave de API inválida"}), 401
         logger.info("Processo iniciado")
         resultado = processo_envio_turn()
-        if resultado["status"] == "sucesso":
+        if resultado.get("status") == "sucesso":
             logger.info("Processo finalizado")
+            return jsonify(resultado), 200
     except Exception as e:
         logger.error(f"Extração falhou. Exceção: {e}")
         return jsonify({f"erro": f"Erro do servidor: {str(e)}"}), 500
@@ -94,8 +96,9 @@ def passo3():
             return jsonify({"error": "Chave de API inválida"}), 401
         logger.info("Processo iniciado")
         resultado = programa_mensagens()
-        if resultado["status"] == "sucesso":
+        if resultado.get("status") == "sucesso":
             logger.info("Processo finalizado")
+            return jsonify(resultado), 200
     except Exception as e:
         logger.error(f"Extração falhou. Exceção: {e}")
         return jsonify({f"erro": f"Erro do servidor: {str(e)}"}), 500

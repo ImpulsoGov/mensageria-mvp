@@ -14,8 +14,6 @@ import pandas as pd
 from typing import Any,Tuple
 from src.bd import BigQueryClient
 
-
-
 #### Funcoes
 def pendencia_atualizada(x):
     if x['linha_cuidado']=='cronicos' and x['cronicos_pendente_atual']==True:
@@ -171,7 +169,7 @@ def selecionar_cidadaos() -> Tuple[str, int, dict]:
     job = client.load_table_from_dataframe(df_envio_dia_atual, table_id, job_config=job_config)
 
     # Retornar sucesso com os dados preparados
-    return json.dumps({
+    return {
         'status': 'sucesso',
-        'mensagem': 'Dados processados e histórico atualizado.',
-    }), 200, {'Content-Type': 'application/json'}
+        'mensagem': 'Mensagens enviadas para os cidadãos.'
+    }

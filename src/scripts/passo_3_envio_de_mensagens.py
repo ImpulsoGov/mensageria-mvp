@@ -9,14 +9,12 @@ import requests
 import json
 import time
 import numpy as np
-from dotenv import load_dotenv
 import time
 from datetime import datetime
 import pandas as pd
 
-from src.bd import BigQueryClient
+#rom src.bd import BigQueryClient
 from src.loggers import logger
-
 
 
 tokens_municipios = [
@@ -144,18 +142,17 @@ def programa_mensagens() -> None:
         FROM `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens_teste`
         WHERE mvp_grupo = "teste" and DATE(TIMESTAMP(mvp_data_envio), "America/Sao_Paulo") = DATE(current_datetime("America/Sao_Paulo"))"""
     query_job = client.query(query)
-    contatos: pd.DataFrame = bq_client.consultar_dados(query)    
+    contatos: pd.DataFrame = bq_client.consultar_dados(query)  
     contatos['whatsapp_id'] = contatos['celular_tratado']
     contatos = seleciona_horario(contatos)
-    for index, row in contatos.iterrows():
+    for i in range(len(contatos.index)):
         try:
-            contato = row.to_dict() 
-            token_municipio = next((municipio["token"] for municipio in tokens_municipios if municipio["municipio"] == contato.get("municipio")), None)
-            template = seleciona_template_por_linha_de_cuidado(contato)
-            envia_mensagem(token_municipio, contato, template)
+            token_municipio = next((municipio["token"] for municipio in tokens_municipios if municipio["municipio"] == contatos.loc[i]["municipio"]), None)
+            template = seleciona_template_por_linha_de_cuidado(contatos.loc[i])
+            envia_mensagem(token_municipio, contatos.loc[i], template)
         except Exception as e:
             print(f"Erro no envio do contato: {e}")
-    return json.dumps({
+    return {
         'status': 'sucesso',
-        'mensagem': 'Mensagens enviados para o cidadão.'
-    }), 200, {'Content-Type': 'application/json'}
+        'mensagem': 'Mensagens enviadas para os cidadãos.'
+    }
