@@ -68,8 +68,8 @@ RUN poetry install --no-root
 # Copia o código do aplicativo
 COPY . /app
 
-# Exponha a porta 5000
-EXPOSE 5000
+# Exponha a porta 8080
+EXPOSE 8080
 
 # Comando para iniciar o script de inicialização
 CMD ["poetry", "run", "python", "app.py"]
