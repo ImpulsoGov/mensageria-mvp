@@ -13,7 +13,7 @@ import time
 from datetime import datetime
 import pandas as pd
 
-#rom src.bd import BigQueryClient
+from src.bd import BigQueryClient
 from src.loggers import logger
 
 
