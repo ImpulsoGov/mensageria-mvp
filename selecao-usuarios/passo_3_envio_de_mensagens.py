@@ -147,7 +147,6 @@ contatos['whatsapp_id'] = contatos['celular_tratado']
 
 
 contatos = seleciona_horario(contatos)
-import pdb; pdb.set_trace()
 #### Programa a mensagem
 for i in range(len(contatos.index)):
     try:
