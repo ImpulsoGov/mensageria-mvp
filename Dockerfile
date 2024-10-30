@@ -11,8 +11,8 @@ RUN apt-get update && \
 # Define o diretório de trabalho dentro do contêiner
 WORKDIR /app
 
-ENV POETRY_VIRTUALENVS_CREATE = FALSE
-#ENV POETRY_VIRTUALENVS_IN_PROJECT 0
+ENV POETRY_VIRTUALENVS_CREATE 1
+ENV POETRY_VIRTUALENVS_IN_PROJECT 0
 
 # Definindo argumentos de build
 ARG PROJECT_ID
@@ -64,9 +64,6 @@ RUN poetry config installer.max-workers 10
 
 # Instala as dependências usando o Poetry
 RUN poetry install --no-root
-
-# Força a instalação do pyarrow 
-RUN pip install pyarrow
 
 # Copia o código do aplicativo
 COPY . /app
