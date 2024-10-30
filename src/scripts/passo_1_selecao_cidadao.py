@@ -180,7 +180,6 @@ def selecionar_cidadaos() -> Tuple[str, int, dict]:
     csv_buffer.seek(0)
 
     # Configurando a tabela e o job_config
-    table_id = "seu_projeto.seu_dataset.sua_tabela"
     job_config = bigquery.LoadJobConfig(
         source_format=bigquery.SourceFormat.CSV,
         skip_leading_rows=1,
