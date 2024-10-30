@@ -14,6 +14,7 @@ import pandas as pd
 from typing import Any,Tuple
 from src.bd import BigQueryClient
 import random
+import io
 
 #### Funcoes
 def pendencia_atualizada(x):
@@ -167,9 +168,28 @@ def selecionar_cidadaos() -> Tuple[str, int, dict]:
     df_envio_dia_atual['data_de_nascimento'] = pd.to_datetime(df_envio_dia_atual['data_de_nascimento'], errors='coerce')
     # Adicionar dados na tabela de histórico
     table_id = "predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens"
+    """
     # Incremento com os dados do dia atual
     job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
     job = client.load_table_from_dataframe(df_envio_dia_atual, table_id, job_config=job_config)
+    """
+
+    # Salvando o DataFrame em um buffer CSV
+    csv_buffer = io.StringIO()
+    df_envio_dia_atual.to_csv(csv_buffer, index=False)
+    csv_buffer.seek(0)
+
+    # Configurando a tabela e o job_config
+    table_id = "seu_projeto.seu_dataset.sua_tabela"
+    job_config = bigquery.LoadJobConfig(
+        source_format=bigquery.SourceFormat.CSV,
+        skip_leading_rows=1,
+        write_disposition="WRITE_APPEND",
+    )
+
+    # Carregando o arquivo CSV do buffer para a tabela no BigQuery
+    with csv_buffer as file_obj:
+        job = client.load_table_from_file(file_obj, table_id, job_config=job_config)
 
     # Retornar sucesso com os dados preparados
     return {
