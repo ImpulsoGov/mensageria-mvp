@@ -16,6 +16,7 @@ from src.bd import BigQueryClient
 import random
 import io
 import tempfile
+import os
 
 #### Funcoes
 def pendencia_atualizada(x):
