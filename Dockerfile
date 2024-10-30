@@ -5,14 +5,10 @@ FROM python:3.10.8-slim-bullseye
 RUN apt-get update && \
     apt-get install -y \
     curl \
-    gcc-4.8 \
-    g++-4.8 \
+    gcc \
+    g++ \
     build-essential \
     libpq-dev 
-
-# Defina GCC e G++ 4.8 como compiladores padrão
-ENV CC=gcc-4.8
-ENV CXX=g++-4.8
 
 # Define o diretório de trabalho dentro do contêiner
 WORKDIR /app
