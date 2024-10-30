@@ -93,7 +93,8 @@ def send_data(df, municipio_id_sus):
             print(f"Resposta do perfil para {row.celular_tratado}: {response_profile.text}")
         except Exception as e:
             print(f"Erro ao atualizar perfil de {row.celular_tratado}: {e}")
-        time.sleep(1)
+        
+        time.sleep(3)
 
 
 
