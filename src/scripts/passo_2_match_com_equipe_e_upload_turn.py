@@ -182,3 +182,4 @@ def processo_envio_turn() -> None:
         'status': 'sucesso',
         'mensagem': 'Mensagens enviadas para os cidadãos.'
     }
+
