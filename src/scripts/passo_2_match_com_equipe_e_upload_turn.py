@@ -77,8 +77,8 @@ def send_data(df, municipio_id_sus):
             "equipe_ine": row.equipe_ine,
             "equipe_nome": row.equipe_nome,
             "mvp_tipo_grupo": row.mvp_tipo_grupo,
-            "mvp_data_envio": row.mvp_data_envio.strftime("%Y-%m-%d %H:%M:%S"),
-            "mvp_grupo": row.mvp_grupo,
+            "data_envio": row.data_envio.strftime("%Y-%m-%d %H:%M:%S"),
+            "grupo": row.grupo,
             "estabelecimento_horario": row.estabelecimento_horario,
             "estabelecimento_documentos": row.estabelecimento_documentos,
             "estabelecimento_nome": row.estabelecimento_nome,
@@ -105,7 +105,7 @@ def processo_envio_turn() -> None:
     query = """
         SELECT *
         FROM `predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens`
-        WHERE mvp_data_envio = current_date("America/Sao_Paulo") AND mvp_grupo='teste'
+        WHERE data_envio = current_date("America/Sao_Paulo") AND grupo='teste'
     """
     df_historico_envio_mensagens: pd.DataFrame = bq_client.consultar_dados(query)
     # carregando dados dos municipios da tabela do ibge
@@ -138,8 +138,8 @@ def processo_envio_turn() -> None:
     df = pd.merge(df_historico_envio_mensagens, df_contatos_turnio, left_on=['equipe_nome','municipio','uf_sigla'], right_on=['details_equipe_nome','municipio','uf'], how='left')
     df_envio_turn = df[['municipio','uf_sigla','municipio_id_sus','equipe_ine','equipe_nome',
                                                 'linha_cuidado','nome_do_paciente','data_de_nascimento',
-                                                'celular_tratado','mvp_tipo_grupo','mvp_data_envio',
-                                                'mvp_grupo','details_horarios_cronicos','details_telefone',
+                                                'celular_tratado','mvp_tipo_grupo','data_envio',
+                                                'grupo','details_horarios_cronicos','details_telefone',
                                                 'details_estabelecimento_endereco',
                                                 'details_estabelecimento_telefone',
                                                 'details_estabelecimento_nome','details_horarios_cito',
@@ -166,8 +166,8 @@ def processo_envio_turn() -> None:
     # - equipe_ine
     # - equipe_nome
     # - mvp_tipo_grupo
-    # - mvp_data_envio
-    # - mvp_grupo
+    # - data_envio
+    # - grupo
     # - estabelecimento_horario
     # - estabelecimento_documentos
     # - estabelecimento_nome
