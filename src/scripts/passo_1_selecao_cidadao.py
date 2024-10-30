@@ -13,6 +13,10 @@ import numpy as np
 import pandas as pd
 from typing import Any,Tuple
 from src.bd import BigQueryClient
+import random
+import io
+import tempfile
+import os
 
 #### Funcoes
 def pendencia_atualizada(x):
@@ -52,9 +56,11 @@ def dividir_grupos_equilibrado(grupo, num_grupos=3):
     grupo_size = len(grupo)
     base_size = grupo_size // num_grupos
     extra = grupo_size % num_grupos
-    grupos = np.array([i + 1 for i in range(num_grupos) for _ in range(base_size)])
-    grupos = np.concatenate([grupos, np.arange(1, extra + 1)])
-    np.random.shuffle(grupos)
+    
+    grupos = [i + 1 for i in range(num_grupos) for _ in range(base_size)]
+    grupos += [i + 1 for i in range(extra)]
+    random.shuffle(grupos)
+    
     return pd.Series(grupos, index=grupo.index)
 def distribuir_em_horarios(df, num_grupos=3):
     df['horario_grupo'] = df.groupby(['municipio', 'equipe_ine', 'linha_cuidado','grupo'], group_keys=False).apply(
@@ -164,12 +170,29 @@ def selecionar_cidadaos() -> Tuple[str, int, dict]:
     df_envio_dia_atual['data_de_nascimento'] = pd.to_datetime(df_envio_dia_atual['data_de_nascimento'], errors='coerce')
     # Adicionar dados na tabela de histórico
     table_id = "predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens"
-    # Incremento com os dados do dia atual
-    job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-    job = client.load_table_from_dataframe(df_envio_dia_atual, table_id, job_config=job_config)
+
+    # Salvando o DataFrame em um arquivo CSV temporário
+    with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
+        df_envio_dia_atual.to_csv(tmp.name, index=False, encoding="utf-8")
+        tmp_path = tmp.name
+
+        # Configurando a tabela e o job_config
+        job_config = bigquery.LoadJobConfig(
+            source_format=bigquery.SourceFormat.CSV,
+            skip_leading_rows=1,
+            write_disposition="WRITE_APPEND",
+            field_delimiter=','
+        )
+
+        # Carregando o arquivo CSV para a tabela no BigQuery
+        with open(tmp.name, "rb") as file_obj:
+            job = client.load_table_from_file(file_obj, table_id, job_config=job_config)
+            job.result()
+    
+    os.remove(tmp_path)
 
     # Retornar sucesso com os dados preparados
     return {
         'status': 'sucesso',
-        'mensagem': 'Mensagens enviadas para os cidadãos.'
+        'mensagem': 'Dados processados e histórico atualizado.'
     }
