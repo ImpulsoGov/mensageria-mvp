@@ -180,5 +180,5 @@ def processo_envio_turn() -> None:
     # Retornar sucesso com os dados preparados
     return {
         'status': 'sucesso',
-        'mensagem': 'Mensagens enviadas para os cidadãos.'
+        'mensagem': 'Dados enviados para TurnIO.'
     }

@@ -168,18 +168,12 @@ def selecionar_cidadaos() -> Tuple[str, int, dict]:
     df_envio_dia_atual['numero_visitas_ubs_ultimos_12_meses'] = df_envio_dia_atual['numero_visitas_ubs_ultimos_12_meses'].astype(int)
     df_envio_dia_atual['data_de_nascimento'] = pd.to_datetime(df_envio_dia_atual['data_de_nascimento'], errors='coerce')
     # Adicionar dados na tabela de histórico
-    table_id = "predictive-keep-314223.ip_mensageria_camada_prata.teste_historico"
-    """
-    # Incremento com os dados do dia atual
-    job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-    job = client.load_table_from_dataframe(df_envio_dia_atual, table_id, job_config=job_config)
-    """
-    print(df_envio_dia_atual.head())
-    print(df_envio_dia_atual.info())
+    table_id = "predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens"
+
     # Salvando o DataFrame em um arquivo CSV temporário
-    with tempfile.NamedTemporaryFile(suffix=".csv", delete=True) as tmp:
+    with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
         df_envio_dia_atual.to_csv(tmp.name, index=False, encoding="utf-8")
-        tmp.seek(0)  # Retorna ao início do arquivo após escrever
+        tmp_path = tmp.name
 
         # Configurando a tabela e o job_config
         job_config = bigquery.LoadJobConfig(
@@ -193,10 +187,11 @@ def selecionar_cidadaos() -> Tuple[str, int, dict]:
         with open(tmp.name, "rb") as file_obj:
             job = client.load_table_from_file(file_obj, table_id, job_config=job_config)
             job.result()
-            
+    
+    os.remove(tmp_path)
+
     # Retornar sucesso com os dados preparados
     return {
         'status': 'sucesso',
-        'mensagem': 'Mensagens enviadas para os cidadãos.'
+        'mensagem': 'Dados processados e histórico atualizado.'
     }
-
