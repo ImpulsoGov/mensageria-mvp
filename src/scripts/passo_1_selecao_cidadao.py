@@ -167,8 +167,7 @@ def selecionar_cidadaos() -> Tuple[str, int, dict]:
     df_envio_dia_atual['numero_visitas_ubs_ultimos_12_meses'] = df_envio_dia_atual['numero_visitas_ubs_ultimos_12_meses'].astype(int)
     df_envio_dia_atual['data_de_nascimento'] = pd.to_datetime(df_envio_dia_atual['data_de_nascimento'], errors='coerce')
     # Adicionar dados na tabela de histórico
-    #table_id = "predictive-keep-314223.ip_mensageria_camada_prata.teste_historico"
-    table_id="predictive-keep-314223.ip_mensageria_camada_prata.teste_historico"
+    table_id = "predictive-keep-314223.ip_mensageria_camada_prata.teste_historico"
     """
     # Incremento com os dados do dia atual
     job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
