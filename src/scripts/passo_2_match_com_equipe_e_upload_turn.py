@@ -12,9 +12,16 @@ import os
 import time
 import json
 from typing import List, Dict, Tuple
-from src.bd import BigQueryClient
+#from src.bd import BigQueryClient
 from datetime import datetime
 from google.cloud import bigquery
+
+import sys
+import os
+sys.path.append(r"C:/impulsogov/mensageria-mvp/src")
+
+from bd import BigQueryClient
+
 
 tokens_municipios = [
     {"municipio": "Paulo Ramos", "id_sus": "210810", "token": os.getenv('ENV_PAULORAMOS_MA')},
@@ -94,9 +101,7 @@ def send_data(df, municipio_id_sus):
         except Exception as e:
             print(f"Erro ao atualizar perfil de {row.celular_tratado}: {e}")
         
-        time.sleep(3)
-
-
+        time.sleep(1)
 
 
 def processo_envio_turn() -> None:
