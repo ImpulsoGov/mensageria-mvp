@@ -11,8 +11,8 @@ RUN apt-get update && \
 # Define o diretório de trabalho dentro do contêiner
 WORKDIR /app
 
-ENV POETRY_VIRTUALENVS_CREATE 1
-ENV POETRY_VIRTUALENVS_IN_PROJECT 0
+ENV POETRY_VIRTUALENVS_CREATE = FALSE
+#ENV POETRY_VIRTUALENVS_IN_PROJECT 0
 
 # Definindo argumentos de build
 ARG PROJECT_ID
