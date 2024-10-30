@@ -53,9 +53,11 @@ def dividir_grupos_equilibrado(grupo, num_grupos=3):
     grupo_size = len(grupo)
     base_size = grupo_size // num_grupos
     extra = grupo_size % num_grupos
-    grupos = np.array([i + 1 for i in range(num_grupos) for _ in range(base_size)])
-    grupos = np.concatenate([grupos, np.arange(1, extra + 1)])
-    np.random.shuffle(grupos)
+    
+    grupos = [i + 1 for i in range(num_grupos) for _ in range(base_size)]
+    grupos += [i + 1 for i in range(extra)]
+    random.shuffle(grupos)
+    
     return pd.Series(grupos, index=grupo.index)
 def distribuir_em_horarios(df, num_grupos=3):
     df['horario_grupo'] = df.groupby(['municipio', 'equipe_ine', 'linha_cuidado','grupo'], group_keys=False).apply(
@@ -167,7 +169,7 @@ def selecionar_cidadaos() -> Tuple[str, int, dict]:
     table_id = "predictive-keep-314223.ip_mensageria_camada_prata.historico_envio_mensagens"
     # Incremento com os dados do dia atual
     job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-    job = client.load_table_from_dataframe(df_envio_dia_atual, table_id, job_config=job_config, use_pyarrow=False
+    job = client.load_table_from_dataframe(df_envio_dia_atual, table_id, job_config=job_config)
 
     # Retornar sucesso com os dados preparados
     return {
