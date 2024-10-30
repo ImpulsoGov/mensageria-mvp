@@ -71,7 +71,7 @@ def send_data(df, municipio_id_sus):
         json_data_profile = {
             "opted_in": True,
             "nome_do_paciente": row.nome_do_paciente,
-            "linha_de_cuidado": row.linha_cuidado ,
+            "linha_cuidado": row.linha_cuidado ,
             "municipio": row.municipio,
             "municipio_id_sus": row.municipio_id_sus,
             "equipe_ine": row.equipe_ine,
@@ -160,7 +160,7 @@ def processo_envio_turn() -> None:
     # Da upload no perfil respectivo ao seu municipio na Turn. Inclui os seguintes campos:
     # - opted_in=true
     # - nome_do_paciente
-    # - linha_de_cuidado
+    # - linha_cuidado
     # - municipio
     # - municipio_id_sus
     # - equipe_ine
