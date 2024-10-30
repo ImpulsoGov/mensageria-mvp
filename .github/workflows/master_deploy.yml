@@ -95,3 +95,5 @@ jobs:
             --platform=managed \
             --allow-unauthenticated \
             --project=predictive-keep-314223
+        env:
+          PORT: 8080
