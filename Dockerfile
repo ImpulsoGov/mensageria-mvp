@@ -65,7 +65,7 @@ RUN poetry config installer.max-workers 10
 # Instala as dependências usando o Poetry
 RUN poetry install --no-root
 
-# Força a instalação do pyarrow
+# Força a instalação do pyarrow 
 RUN pip install pyarrow
 
 # Copia o código do aplicativo
