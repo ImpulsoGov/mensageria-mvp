@@ -18,9 +18,6 @@ from google.cloud import bigquery
 
 import sys
 import os
-sys.path.append(r"C:/impulsogov/mensageria-mvp/src")
-
-from bd import BigQueryClient
 
 
 tokens_municipios = [
