@@ -97,6 +97,7 @@ def send_data(df, municipio_id_sus):
         try:
             response_profile = requests.patch(url_profile, headers=headers, json=json_data_profile)
             print(f"Resposta do perfil para {row.celular_tratado}: {response_profile.text}")
+            time.sleep(1)
         except Exception as e:
             print(f"Erro ao atualizar perfil de {row.celular_tratado}: {e}")
         
