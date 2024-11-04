@@ -4,22 +4,16 @@
 
 
 #### Configurações iniciais do ambiente
-import pandas as pd
-import io
-import numpy as np
-import requests
 import os
 import time
-import json
-from typing import List, Dict, Tuple
-from src.bd import BigQueryClient
-from datetime import datetime
-from google.cloud import bigquery
+
+import pandas as pd
+import requests
 from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-import sys
-import os
+from src.bd import BigQueryClient
+
 
 load_dotenv()
 
