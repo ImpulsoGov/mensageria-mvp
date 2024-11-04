@@ -16,6 +16,7 @@ from src.bd import BigQueryClient
 from datetime import datetime
 from google.cloud import bigquery
 from dotenv import load_dotenv
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 import sys
 import os
@@ -41,6 +42,10 @@ tokens_municipios = [
 
 
 #### Funcoes
+@retry(
+    wait=wait_exponential(multiplier=1, min=4, max=10), 
+    stop=stop_after_attempt(3),
+)
 def send_one(celular_tratado, token) -> requests.Response:
     url_message = 'https://whatsapp.turn.io/v1/messages'
     headers = {
@@ -59,6 +64,10 @@ def send_one(celular_tratado, token) -> requests.Response:
     return response
 
 
+@retry(
+    wait=wait_exponential(multiplier=1, min=4, max=10), 
+    stop=stop_after_attempt(3),
+)
 def update_user_profile(
     celular_tratado,
     data_profile,
