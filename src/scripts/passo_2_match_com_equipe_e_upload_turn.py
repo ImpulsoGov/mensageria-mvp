@@ -39,39 +39,59 @@ tokens_municipios = [
     {"municipio": "Lagoa do Ouro", "id_sus": "260860", "token": os.getenv('ENV_LAGOADOOURO_PE')},
 ]
 
+
 #### Funcoes
+def send_one(celular_tratado, token) -> requests.Response:
+    url_message = 'https://whatsapp.turn.io/v1/messages'
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Accept': 'application/vnd.v1+json',
+        'Content-Type': 'application/json'
+    }
+    data_message = {
+        "preview_url": False,
+        "recipient_type": "individual",
+        "to": str(celular_tratado),
+        "type": "text",
+        "text": {"body": "Este número pertence a ImpulsoGov."}
+    }
+    response = requests.post(url_message, headers=headers, json=data_message)
+    return response
+
+
+def update_user_profile(
+    celular_tratado,
+    data_profile,
+    token,
+) -> requests.Response:
+    url_profile = 'https://whatsapp.turn.io/v1/contacts/{}/profile'.format(
+        celular_tratado,
+    )
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Accept': 'application/vnd.v1+json',
+        'Content-Type': 'application/json'
+    }
+    response = requests.patch(url_profile, headers=headers, json=data_profile)
+    return response
+
+
 def send_data(df, municipio_id_sus):
     token = next((municipio["token"] for municipio in tokens_municipios if municipio["id_sus"] == municipio_id_sus), None) 
     if not token:
         print(f"Token não encontrado para {municipio_id_sus}")
         return
 
-    headers = {
-        'Authorization': f'Bearer {token}',
-        'Accept': 'application/vnd.v1+json',
-        'Content-Type': 'application/json'
-    }
-
     df_filtered = df[df['municipio_id_sus'] == municipio_id_sus]
 
-    for i, row in df_filtered.iterrows():
-        data_message = {
-            "preview_url": False,
-            "recipient_type": "individual",
-            "to": str(row.celular_tratado),
-            "type": "text",
-            "text": {"body": "Este número pertence a ImpulsoGov."}
-        }
-        url_message = 'https://whatsapp.turn.io/v1/messages'
-
+    for _, row in df_filtered.iterrows():
         try:
-            response_message = requests.post(url_message, headers=headers, json=data_message)
+            response_message = send_one(row.celular_tratado, token=token)
             print(f"Resposta da mensagem para {row.celular_tratado}: {response_message.text}")
+            time.sleep(1)
         except Exception as e:
             print(f"Erro ao enviar mensagem para {row.celular_tratado}: {e}")
             continue
-
-        time.sleep(1)
 
         #atualiza opted_in
         json_data_profile = {
@@ -93,9 +113,12 @@ def send_data(df, municipio_id_sus):
             "horarios_cronicos": row.horarios_cronicos,
             "horarios_cito": row.horarios_cito
         }
-        url_profile = f'https://whatsapp.turn.io/v1/contacts/{row.celular_tratado}/profile'
         try:
-            response_profile = requests.patch(url_profile, headers=headers, json=json_data_profile)
+            response_profile = update_user_profile(
+                row.celular_tratado,
+                json_data_profile,
+                token=token,
+            )
             print(f"Resposta do perfil para {row.celular_tratado}: {response_profile.text}")
             time.sleep(1)
         except Exception as e:
