@@ -15,10 +15,12 @@ from typing import List, Dict, Tuple
 from src.bd import BigQueryClient
 from datetime import datetime
 from google.cloud import bigquery
+from dotenv import load_dotenv
 
 import sys
 import os
 
+load_dotenv()
 
 tokens_municipios = [
     {"municipio": "Paulo Ramos", "id_sus": "210810", "token": os.getenv('ENV_PAULORAMOS_MA')},
