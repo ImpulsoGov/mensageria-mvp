@@ -77,7 +77,7 @@ def distribuir_em_horarios(df, num_grupos=3):
 # Histórico e divisão dos grupos de teste e controle
 query = """
     SELECT *
-    FROM `predictive-keep-314223.ip_mensageria_camada_prata.divisao_teste_controle_equipes`
+    FROM `predictive-keep-314223.ip_mensageria_camada_prata.divisao_teste_controle_equipes_disparo`
 """
 query_job = client.query(query)
 rows = [dict(row) for row in query_job]

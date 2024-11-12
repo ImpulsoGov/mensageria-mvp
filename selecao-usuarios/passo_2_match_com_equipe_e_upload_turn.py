@@ -56,7 +56,8 @@ def send_data(df, municipio_id_sus):
             print(f"Erro ao enviar mensagem para {row.celular_tratado}: {e}")
             continue
 
-        time.sleep(1)
+        time.sleep(1.5)
+
 
         #atualiza opted_in
         json_data_profile = {
@@ -111,8 +112,24 @@ rows = [dict(row) for row in query_job]
 df_ibge = pd.DataFrame(rows)
 # carregando a view com dados da Turn io
 query = """
-    SELECT *
-    FROM `predictive-keep-314223.ip_mensageria_camada_prata.contact_details_turnio`
+    SELECT *,
+        JSON_VALUE(details, "$.cargo") AS details_cargo,
+        JSON_VALUE(details, "$.horarios_cronicos") AS details_horarios_cronicos,
+        JSON_VALUE(details, "$.telefone") AS details_telefone,
+        JSON_VALUE(details, "$.municipio") AS details_municipio,
+        JSON_VALUE(details, "$.estabelecimento_endereco") AS details_estabelecimento_endereco,
+        JSON_VALUE(details, "$.estabelecimento_telefone") AS details_estabelecimento_telefone,
+        JSON_VALUE(details, "$.estabelecimento_nome") AS details_estabelecimento_nome,
+        JSON_VALUE(details, "$.equipe_nome") AS details_equipe_nome,
+        JSON_VALUE(details, "$.horarios_cito") AS details_horarios_cito,
+        JSON_VALUE(details, "$.estabelecimento_documentos") AS details_estabelecimento_documentos,
+        JSON_VALUE(details, "$.estabelecimento_horario") AS details_estabelecimento_horario,
+    FROM (
+        SELECT *,
+            ROW_NUMBER() OVER (PARTITION BY urn ORDER BY updated_at DESC) AS row_num
+        FROM `predictive-keep-314223.5511974565221.contacts`
+    )
+    WHERE row_num = 1;
 """
 
 query_job = client.query(query)
@@ -126,6 +143,8 @@ df_contatos_turnio = pd.DataFrame(rows)
 # na view "ip_mensageria_camada_prata.contact_details_turnio" no BigQuery.
 df_ibge['id_sus'] = df_ibge['id_sus'].astype(str)
 df_historico_envio_mensagens['municipio_id_sus'] = df_historico_envio_mensagens['municipio_id_sus'].astype(str)
+df_historico_envio_mensagens.loc[df_historico_envio_mensagens['municipio'] == 'Lagoa do ouro', 'municipio'] = 'Lagoa do Ouro'
+
 # merge da tabela de usuários com de municípios
 df_historico_envio_mensagens = pd.merge(df_historico_envio_mensagens, df_ibge[['id_sus','nome','uf_sigla']], left_on=['municipio_id_sus'],right_on=['id_sus'] , how='left')
 df_contatos_turnio[['municipio', 'uf']] = df_contatos_turnio['details_municipio'].str.split(' - ', expand=True)
@@ -197,9 +216,9 @@ tokens_municipios = [
     {"municipio": "Alagoinha", "id_sus": "260060", "token": os.getenv('ENV_ALAGOINHA_PE')},
     {"municipio": "Baraúna", "id_sus": "240145", "token": os.getenv('ENV_BARAUNA_RN')},
     {"municipio": "Jucuruçu", "id_sus": "291845", "token": os.getenv('ENV_JUCURUCU_BA')},
-    {"municipio": "Vitorino Freire", "id_sus": "211300", "token": os.getenv('ENV_VITORINOFREIRE_MA')},
-    {"municipio": "Brejo de Areia", "id_sus": "210215", "token": os.getenv('ENV_BREJODEAREIA_MA')},
-    {"municipio": "Oiapoque", "id_sus": "160050", "token": os.getenv('ENV_OIAPOQUE_AP')},
+    # {"municipio": "Vitorino Freire", "id_sus": "211300", "token": os.getenv('ENV_VITORINOFREIRE_MA')},
+    # {"municipio": "Brejo de Areia", "id_sus": "210215", "token": os.getenv('ENV_BREJODEAREIA_MA')},
+    # {"municipio": "Oiapoque", "id_sus": "160050", "token": os.getenv('ENV_OIAPOQUE_AP')},
     {"municipio": "Tarrafas", "id_sus": "231325", "token": os.getenv('ENV_TARRAFAS_CE')},
     {"municipio": "Salvaterra", "id_sus": "150630", "token": os.getenv('ENV_SALVATERRA_PA')},
     {"municipio": "Lagoa do Ouro", "id_sus": "260860", "token": os.getenv('ENV_LAGOADOOURO_PE')},
