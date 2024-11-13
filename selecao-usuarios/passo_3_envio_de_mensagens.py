@@ -30,7 +30,7 @@ tokens_municipios = [
     {"municipio": "Alagoinha", "id_sus": "260060", "token": os.getenv('ENV_ALAGOINHA_PE'), "link_imagem": "https://i.imgur.com/Hn7Z9TI.png"},
     {"municipio": "Baraúna", "id_sus": "240145", "token": os.getenv('ENV_BARAUNA_RN'), "link_imagem": "https://i.imgur.com/aQDjqJv.png"},
     {"municipio": "Jucuruçu", "id_sus": "291845", "token": os.getenv('ENV_JUCURUCU_BA'), "link_imagem": "https://i.imgur.com/Rp2zq72.png"},
-    {"municipio": "Tarrafas", "id_sus": "231325", "token": os.getenv('ENV_TARRAFAS_CE'), "link_imagem": "https://i.imgur.com/J93IDWu.png"},
+    {"municipio": "Tarrafas", "id_sus": "231325", "token": os.getenv('ENV_TARRAFAS_CE'), "link_imagem": "https://i.imgur.com/G4scY7R.png"},
     {"municipio": "Salvaterra", "id_sus": "150630", "token": os.getenv('ENV_SALVATERRA_PA'), "link_imagem": "https://i.imgur.com/bnwogCJ.png"},
     {"municipio": "Lagoa do Ouro", "id_sus": "260860", "token": os.getenv('ENV_LAGOADOOURO_PE'), "link_imagem": "https://i.imgur.com/xGLsHnO.png"},
     # {"municipio": "Vitorino Freire", "id_sus": "211300", "token": os.getenv('ENV_VITORINOFREIRE_MA'), "link_imagem": "https://i.imgur.com/BmqRuY0.png"},
