@@ -52,7 +52,7 @@ def pendencia_cronicos(x):
         return True
     else:
         return False
-def selecionar_usuarios(df, max_usuarios=15):
+def selecionar_usuarios(df, max_usuarios=45):
     return df.groupby(['municipio', 'equipe_ine', 'linha_cuidado','grupo']).apply(
         lambda x: x.sample(min(len(x), max_usuarios))
     ).reset_index(drop=True)
@@ -151,7 +151,7 @@ df_filtrado['data_exame_diabeticos'] = df_filtrado['data_exame_diabeticos'].asty
 
 
 #### Divisão por horários
-df_selecionados = selecionar_usuarios(df_filtrado, max_usuarios=15)
+df_selecionados = selecionar_usuarios(df_filtrado, max_usuarios=45)
 df_envio_diario = distribuir_em_horarios(df_selecionados)
 # Ajuste no formato da coluna de tipo de grupo
 dia_semana = datetime.now().strftime('%a').upper()
