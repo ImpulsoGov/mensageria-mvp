@@ -9,7 +9,7 @@ TOKENS_MUNICIPIOS: Final[list[dict]] = [
     #{"municipio": "Brejo de Areia", "id_sus": "210215", "token": os.getenv('ENV_BREJODEAREIA_MA')},
     {"municipio": "Jucuruçu", "id_sus": "291845", "token": os.getenv('ENV_JUCURUCU_BA')},
     {"municipio": "Lago Verde", "id_sus": "210590", "token": os.getenv('ENV_LAGOVERDE_MA')},
-    {"municipio": "Lagoa do Ouro", "id_sus": "260860", "token": os.getenv('ENV_LAGOADOOURO_PE')},
+    {"municipio": "Lagoa do ouro", "id_sus": "260860", "token": os.getenv('ENV_LAGOADOOURO_PE')},
     {"municipio": "Marajá do Sena", "id_sus": "210635", "token": os.getenv('ENV_MARAJADOSENA_MA')},
     {"municipio": "Monsenhor Tabosa", "id_sus": "230860", "token": os.getenv('ENV_MONSENHORTABOSA_CE')},
     #{"municipio": "Oiapoque", "id_sus": "160050", "token": os.getenv('ENV_OIAPOQUE_AP')},
@@ -52,7 +52,8 @@ EVENTOS_COLUNAS_TIPOS: Final[frozendict] = frozendict(
     # Define os tipos esperados nas colunas de eventos_mvp01_segundo_ciclo
     {
         "municipio_id_sus": str,
-        "equipe_ine_vinculo": str,
+        "equipe_ine_vinc": str,
+        "equipe_ine": str,
         "nome": str,
         "cns": str,
         "cpf": str,
