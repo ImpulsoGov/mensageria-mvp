@@ -101,7 +101,7 @@ def definir_mensagem(df: pd.DataFrame) -> pd.DataFrame:
         logger.error('O DataFrame está vazio. Nenhuma classificação será realizada.')
         raise ConsultaBigQueryException('O DataFrame está vazio. Nenhuma classificação será realizada.')
 
-    df['mensagem_tipo'] = np.random.randint(1, 9, size=len(df))
+    df['mensagem_tipo'] = np.random.randint(1, 10, size=len(df))
     return df
 
 def definir_template(contato: pd.Series) -> dict:
@@ -251,6 +251,7 @@ def processar_envios(
 
     logger.info(f'Consultando usuários do município {municipio_id_sus}')
     df_cidadaos = selecionar_cidadaos(municipio_id_sus, data_programada)
+    #df_cidadaos = carregar_dataframe(municipio_id_sus)
 
     logger.info(f'Classificando os cidadãos para envio de mensagens')
     df_classificado = definir_mensagem(df_cidadaos)
@@ -273,6 +274,8 @@ def processar_envios(
                 resposta = envia_mensagem(token_municipio, contato["telefone"], template)
 
                 logger.info(f'Registrando envio bem-sucedido para {contato["telefone"]}')
+
+                #adicionar_contato(token_municipio,contato)
                 inserir_registro_evento(
                     contato=contato,
                     data_programada=data_programada,
