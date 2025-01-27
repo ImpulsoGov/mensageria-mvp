@@ -1,11 +1,11 @@
-<!-- { section: "39d5618f-837b-44a0-952d-2dde9274012d", x: 0, y: 0} -->
+<!-- { section: "8c0ece70-4c75-49c8-a967-d7e33e1cc2bb", x: -264, y: 0} -->
 
 ```stack
 trigger(on: "CATCH ALL")
 
 ```
 
-<!-- { section: "89ad4645-427f-4e61-a7f0-0751188924ca", x: 504, y: 0} -->
+<!-- { section: "d3f87bd7-c022-41b0-bc5b-c7a05d9e2549", x: 120, y: 0} -->
 
 ```stack
 card Branch_d980e1, "Branch_d980e1", code_generator: "CONDITIONALS" do
@@ -18,7 +18,7 @@ end
 
 ```
 
-<!-- { section: "dc8b6e97-be0e-4e48-acd6-e46400ba4819", x: 1032, y: 408} -->
+<!-- { section: "879ba17f-7172-4805-aa7b-182481ac7f6b", x: 1008, y: 600} -->
 
 ```stack
 card Text_058211, "Text_058211", code_generator: "TEXT_MESSAGE" do
@@ -29,7 +29,7 @@ end
 
 ```
 
-<!-- { section: "97a495df-2598-4325-81e7-d19cd6dd520b", x: 1032, y: 120} -->
+<!-- { section: "abfadf53-dc78-4412-a61c-129a1c726e24", x: 744, y: 192} -->
 
 ```stack
 card Text_9b406e, "Text_9b406e", code_generator: "TEXT_MESSAGE" do
@@ -40,7 +40,7 @@ end
 
 ```
 
-<!-- { section: "43816ed0-4225-46b9-a99b-aa2e27656c44", x: 1680, y: -1152} -->
+<!-- { section: "36aaf17c-e9be-4fd6-9c71-ae25a9a8793d", x: 1776, y: -1176} -->
 
 ```stack
 card Text_635538, "Text_635538", code_generator: "TEXT_MESSAGE" do
@@ -50,10 +50,10 @@ card Text_635538, "Text_635538", code_generator: "TEXT_MESSAGE" do
 ---
 🏡 *Endereço*: @contact.estabelecimento_endereco.
 ---
-📍 É necessário comparecer 
-à unidade de saúde portando: *@contact.estabelecimento_documentos .* Caso não tenha o(s) documento(s) procure a unidade para mais informações.
 
 ➡️ É realizado a coleta do citopatológico: @contact.horarios_cito .
+
+_Vale lembrar: o exame não pode ser realizado em caso de menstruação ou relação sexual dois dias antes. 😉_
 
 😀 Aguardamos por você!")
 end
@@ -70,7 +70,7 @@ end
 
 ```
 
-<!-- { section: "f5a00bb2-4bf8-47b0-8139-4b97bf86c217", x: 1656, y: 144} -->
+<!-- { section: "1ec545ea-52fb-4f23-ae6c-cac28a534e15", x: 1776, y: -384} -->
 
 ```stack
 card Text_635538_060e7c, "Text_635538_060e7c", code_generator: "TEXT_MESSAGE" do
@@ -80,8 +80,6 @@ card Text_635538_060e7c, "Text_635538_060e7c", code_generator: "TEXT_MESSAGE" do
 ---
 🏡 *Endereço*: @contact.estabelecimento_endereco.
 ---
-📍 É necessário comparecer 
-à unidade de saúde portando: *@contact.estabelecimento_documentos .* Caso não tenha o(s) documento(s) procure a unidade para mais informações.
 
 ➡️ Este atendimento é realizado: @contact.horarios_cronicos .
 
@@ -102,6 +100,6 @@ end
 <!-- { section: "INTERACTION_TIMEOUT_CELL", x: 0, y: 0} -->
 
 ```stack
-interaction_timeout(120)
+interaction_timeout(86400)
 
 ```
