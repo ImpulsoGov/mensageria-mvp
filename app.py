@@ -7,9 +7,7 @@ import os
 load_dotenv()
 
 # Importando as funções
-from src.scripts.passo_1_selecao_cidadao import selecionar_cidadaos
-from src.scripts.passo_2_match_com_equipe_e_upload_turn import processo_envio_turn
-from src.scripts.passo_3_envio_de_mensagens import programa_mensagens
+from src.scripts.segundo_ciclo.enviar_mensagens import processar_envios
 from src.loggers import logger
 
 PROJECT_ID = os.getenv('PROJECT_ID')
@@ -37,73 +35,48 @@ def validar_autenticacao(
         return False
     return True
 
-@app.route("/passo1", methods=['GET'])
-def passo1():
+@app.route("/enviar_mensagens", methods=['POST'])
+def enviar_mensagens():
     try:
         # Validação da chave recebida
         chave_recebida = request.headers.get("X-API-Key")
         logger.info("Autenticando chave de acesso")
-        validar_autenticacao(chave_recebida=chave_recebida)
-        # Se a chave não for fornecida, retornar erro
+        
         if not chave_recebida:
             return jsonify({"error": "Chave de API ausente"}), 401
+        
         # Autenticar a requisição
         if not validar_autenticacao(chave_recebida=chave_recebida):
             return jsonify({"error": "Chave de API inválida"}), 401
-        logger.info("Processo iniciado")
-        resultado = selecionar_cidadaos()
-        if resultado.get("status") == "sucesso":
-            logger.info("Processo finalizado")
+        
+        # Extração do payload JSON
+        payload = request.get_json()
+        if not payload:
+            return jsonify({"error": "Payload ausente ou inválido"}), 400
+        
+        municipio_id_sus = payload.get("municipio_id_sus")
+        data_programada = payload.get("data_programada")
+        
+        if not municipio_id_sus or not data_programada:
+            return jsonify({"error": "Os campos 'municipio_id_sus' e 'data_programada' são obrigatórios"}), 400
+        
+        logger.info(f"Processo iniciado para município: {municipio_id_sus} e data: {data_programada}")
+        
+        # Chama a função de processamento com os parâmetros fornecidos
+        resultado = processar_envios(
+            municipio_id_sus=municipio_id_sus, 
+            data_programada=data_programada
+            )
+        
+        if resultado.get("status") == 200:
+            logger.info("Processo finalizado com sucesso")
             return jsonify(resultado), 200
     except Exception as e:
         logger.error(f"Extração falhou. Exceção: {e}")
         return jsonify({f"erro": f"Erro do servidor: {str(e)}"}), 500
 
-@app.route("/passo2", methods=['GET'])
-def passo2():
-    try:
-        # Validação da chave recebida
-        chave_recebida = request.headers.get("X-API-Key")
-        logger.info("Autenticando chave de acesso")
-        validar_autenticacao(chave_recebida=chave_recebida)
-        # Se a chave não for fornecida, retornar erro
-        if not chave_recebida:
-            return jsonify({"error": "Chave de API ausente"}), 401
-        # Autenticar a requisição
-        if not validar_autenticacao(chave_recebida=chave_recebida):
-            return jsonify({"error": "Chave de API inválida"}), 401
-        logger.info("Processo iniciado")
-        resultado = processo_envio_turn()
-        if resultado.get("status") == "sucesso":
-            logger.info("Processo finalizado")
-            return jsonify(resultado), 200
-    except Exception as e:
-        logger.error(f"Extração falhou. Exceção: {e}")
-        return jsonify({f"erro": f"Erro do servidor: {str(e)}"}), 500
-
-@app.route("/passo3", methods=['GET'])
-def passo3():
-    try:
-        # Validação da chave recebida
-        chave_recebida = request.headers.get("X-API-Key")
-        logger.info("Autenticando chave de acesso")
-        validar_autenticacao(chave_recebida=chave_recebida)
-        # Se a chave não for fornecida, retornar erro
-        if not chave_recebida:
-            return jsonify({"error": "Chave de API ausente"}), 401
-        # Autenticar a requisição
-        if not validar_autenticacao(chave_recebida=chave_recebida):
-            return jsonify({"error": "Chave de API inválida"}), 401
-        logger.info("Processo iniciado")
-        resultado = programa_mensagens()
-        if resultado.get("status") == "sucesso":
-            logger.info("Processo finalizado")
-            return jsonify(resultado), 200
-    except Exception as e:
-        logger.error(f"Extração falhou. Exceção: {e}")
-        return jsonify({f"erro": f"Erro do servidor: {str(e)}"}), 500
 
 
 if __name__ == "__main__":
     from waitress import serve
-    serve(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+    serve(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))

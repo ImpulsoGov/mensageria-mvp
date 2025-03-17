@@ -58,7 +58,7 @@ def send_data(df, municipio_id_sus):
 
         time.sleep(1.5)
 
-
+#mensageria_usuarios_citopatologico_mensagem_c_imagem_v0
         #atualiza opted_in
         json_data_profile = {
             "opted_in": True,
