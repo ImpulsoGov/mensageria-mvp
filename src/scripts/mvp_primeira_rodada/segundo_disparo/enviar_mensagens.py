@@ -12,8 +12,8 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from src.bd import BigQueryClient
 from src.loggers import logger
-from src.scripts.segundo_ciclo.gerenciar_contatos import adicionar_contato
-from src.scripts.segundo_ciclo.utilitarios import TOKENS_MUNICIPIOS, USUARIOS_COLUNAS_TIPOS, EVENTOS_COLUNAS_TIPOS, MENSAGEM_TEMPLATE
+from src.scripts.segundo_disparo.gerenciar_contatos import adicionar_contato
+from src.scripts.segundo_disparo.utilitarios import TOKENS_MUNICIPIOS, USUARIOS_COLUNAS_TIPOS, EVENTOS_COLUNAS_TIPOS, MENSAGEM_TEMPLATE
 
 # Configurações globais e constantes
 URL_API_MENSAGENS: Final[str] = "https://whatsapp.turn.io/v1/messages"
