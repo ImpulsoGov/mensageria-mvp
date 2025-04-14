@@ -8,7 +8,7 @@ class CampanhaService:
     def __init__(self):
         self.client = BigQueryClient()
 
-    def executar_fluxo(self, municipio_id, campanha_nome,data_corrente):
+    def executar_fluxo(self, municipio_id, campanha_nome,data_corrente,mensagem_tipo):
         campanha = self.obter_campanha(campanha_nome)
         if not campanha or campanha['status'] != 'ativa':
             raise ValueError("Campanha inválida ou inativa")
@@ -26,7 +26,7 @@ class CampanhaService:
         for unidade in unidades:
             classificacao = self.listar_unidades_classificadas(unidade, campanha_nome)
             qtd_pessoas = max(1, unidade['total_pessoas'] // dias_restantes)
-            pessoas = self.selecionar_pessoas(unidade['estabelecimento_saude_cnes'], qtd_pessoas)
+            pessoas = self.selecionar_pessoas(unidade['estabelecimento_saude_cnes'], qtd_pessoas,campanha_nome, mensagem_tipo)
 
             for pessoa in pessoas:
                 self.registrar_cidadao_selecionado(pessoa, classificacao, data_corrente)
@@ -83,10 +83,12 @@ class CampanhaService:
         self.client.inserir_dados(tabela, [unidade_classificada])
         return classificacao_experimento
 
-    def selecionar_pessoas(self, estabelecimento_saude_cnes, qtd_pessoas):
+    def selecionar_pessoas(self, estabelecimento_saude_cnes, qtd_pessoas, campanha_nome, mensagem_tipo):
         query = f"""
             SELECT * FROM `ip_mensageria_camada_ouro.cidadao_elegivel`
             WHERE estabelecimento_saude_cnes = '{estabelecimento_saude_cnes}'
+                AND campanha_nome = '{campanha_nome}'
+                AND mensagem_tipo_programado = '{mensagem_tipo}' 
             LIMIT {qtd_pessoas}
         """
         pessoas_df = self.client.consultar_dados(query)
@@ -100,7 +102,7 @@ class CampanhaService:
         """Define aleatoriamente o horário de envio da mensagem."""
         return random.choice(["8h", "12h", "16h"])
 
-    def definir_mensagem_template_id(self):
+    def definir_mensagem_template_cod(self):
         """Seleciona aleatoriamente um ID de template de mensagem."""
         return random.randint(1, 9)
     
@@ -110,17 +112,24 @@ class CampanhaService:
             return "cronicos"
         return linha_cuidado
     
-    def definir_mensagem_template_nome(self, mensagem_linha_cuidado, mensagem_template_id):
+    def definir_mensagem_template_nome(self, mensagem_linha_cuidado, mensagem_template_cod):
         """Define o nome do template da mensagem com base nas regras."""
-        if mensagem_linha_cuidado in MENSAGEM_TEMPLATE and mensagem_template_id in MENSAGEM_TEMPLATE[mensagem_linha_cuidado]:
-            template_tipo, versao, _, _ = MENSAGEM_TEMPLATE[mensagem_linha_cuidado][mensagem_template_id]
+        if mensagem_linha_cuidado in MENSAGEM_TEMPLATE and mensagem_template_cod in MENSAGEM_TEMPLATE[mensagem_linha_cuidado]:
+            template_tipo, versao, _, _ = MENSAGEM_TEMPLATE[mensagem_linha_cuidado][mensagem_template_cod]
             return f'mensageria_usuarios_{mensagem_linha_cuidado}_{template_tipo}_{versao}'
         return None  # Retorna None caso não haja template correspondente
+    
+    def definir_mensagem_tipo_midia(self, mensagem_linha_cuidado, mensagem_template_cod):
+        """Define o nome do template da mensagem com base nas regras."""
+        if mensagem_linha_cuidado in MENSAGEM_TEMPLATE and mensagem_template_cod in MENSAGEM_TEMPLATE[mensagem_linha_cuidado]:
+            _, _, tipo_midia, _ = MENSAGEM_TEMPLATE[mensagem_linha_cuidado][mensagem_template_cod]
+            return tipo_midia
+        return None  # Retorna None caso não haja template correspondente
 
-    def definir_mensagem_midia_link(self, mensagem_linha_cuidado, mensagem_template_id, municipio_id_sus):
+    def definir_mensagem_midia_link(self, mensagem_linha_cuidado, mensagem_template_cod, municipio_id_sus):
         """Define o link de mídia da mensagem com base nas regras."""
-        if mensagem_linha_cuidado in MENSAGEM_TEMPLATE and mensagem_template_id in MENSAGEM_TEMPLATE[mensagem_linha_cuidado]:
-            template_tipo, _, _, link_func = MENSAGEM_TEMPLATE[mensagem_linha_cuidado][mensagem_template_id]
+        if mensagem_linha_cuidado in MENSAGEM_TEMPLATE and mensagem_template_cod in MENSAGEM_TEMPLATE[mensagem_linha_cuidado]:
+            template_tipo, _, _, link_func = MENSAGEM_TEMPLATE[mensagem_linha_cuidado][mensagem_template_cod]
             return (
                 link_func(municipio_id_sus=municipio_id_sus, template_tipo=template_tipo, linha_cuidado=mensagem_linha_cuidado)
                 if callable(link_func)
@@ -132,22 +141,25 @@ class CampanhaService:
 
         municipio_id_sus = pessoa['municipio_id_sus']
         mensagem_linha_cuidado = self.definir_mensagem_linha_cuidado(pessoa['linha_cuidado'])
-        mensagem_template_id = self.definir_mensagem_template_id()
+        mensagem_template_cod = self.definir_mensagem_template_cod()
         
         pessoa['classificacao_experimento'] = self.definir_classificacao_experimento(classificacao)
         pessoa['envio_data_programado'] = str(data_corrente)  # Adicionando a data do envio
         pessoa['envio_horario_programado'] = self.definir_horario_envio()
-        pessoa['mensagem_template_cod'] = mensagem_template_id
-        pessoa['mensagem_template'] = self.definir_mensagem_template_nome(mensagem_linha_cuidado, mensagem_template_id)
-        pessoa['mensagem_midia_link'] = self.definir_mensagem_midia_link(mensagem_linha_cuidado, mensagem_template_id,municipio_id_sus)
-
+        pessoa['mensagem_template_cod'] = mensagem_template_cod
+        pessoa['mensagem_template_nome'] = self.definir_mensagem_template_nome(mensagem_linha_cuidado, mensagem_template_cod)
+        pessoa['mensagem_midia'] = self.definir_mensagem_tipo_midia(mensagem_linha_cuidado, mensagem_template_cod)
+        pessoa['mensagem_midia_link'] = self.definir_mensagem_midia_link(mensagem_linha_cuidado, mensagem_template_cod,municipio_id_sus)
         pessoa['payload']['cidadao_dt_nascimento'] = str(pessoa['payload']['cidadao_dt_nascimento'].strftime('%Y-%m-%d'))
+        pessoa['cidadao_nome'] = pessoa['payload']['cidadao_nome'] 
 
         # Consultar se o cidadao_id para campanha_nome já existem na tabela
         query = f"""
             SELECT COUNT(*) 
             FROM `ip_mensageria_camada_ouro.cidadao_selecionado`
-            WHERE cidadao_id = '{pessoa['cidadao_id']}' AND campanha_nome = '{pessoa['campanha_nome']}'
+            WHERE cidadao_id = '{pessoa['cidadao_id']}' 
+                AND campanha_nome = '{pessoa['campanha_nome']}'
+                AND mensagem_tipo_programado = '{pessoa['mensagem_tipo_programado']}'
         """
         resultado = self.client.consultar_dados(query)
 
@@ -160,8 +172,3 @@ class CampanhaService:
             print("Registro já existe, não inserido.")
 
 
-#if __name__ == "__main__":
-    # Passo 1: Executar o fluxo de campanha (definir classificação e registrar cidadãos selecionados)
-    #campanha_service = CampanhaService()
-    # Para cada municipio:
-    #campanha_service.executar_fluxo(municipio_id="210535", campanha_nome="mvp_ciclo2",data_corrente='2025-03-31')
